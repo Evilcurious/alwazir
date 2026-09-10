@@ -338,6 +338,17 @@ input, textarea, select {
   padding: 24px;
 }
 
+.special-media-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 .special-media img {
   max-height: 400px;
   object-fit: contain;
@@ -396,6 +407,8 @@ input, textarea, select {
   border: 1px solid transparent;
   transition: all 0.18s ease;
 }
+
+.btn svg { flex-shrink: 0; }
 
 .btn-gold {
   background: var(--gold-gradient);
@@ -476,6 +489,9 @@ input, textarea, select {
   justify-content: center;
   min-height: 46vh;
   overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .product-media img {

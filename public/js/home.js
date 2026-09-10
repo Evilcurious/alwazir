@@ -50,14 +50,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
     specialSection.classList.remove('hidden');
-    specialSection.querySelector('[data-special-media]').innerHTML = Alwazir.mediaHtml(special);
+    const detailsUrl = `/product.html?id=${encodeURIComponent(special.id)}`;
+    specialSection.querySelector('[data-special-media]').innerHTML =
+      `<a class="special-media-link" href="${detailsUrl}" aria-label="View ${Alwazir.escapeHtml(special.name)} details">${Alwazir.mediaHtml(special)}</a>`;
     specialSection.querySelector('[data-special-name]').textContent = special.name;
     specialSection.querySelector('[data-special-desc]').textContent = special.description || '';
     specialSection.querySelector('[data-special-price]').textContent = Alwazir.formatMoney(special.price);
     const addBtn = specialSection.querySelector('[data-special-add]');
     addBtn.dataset.id = special.id;
-    const detailsLink = specialSection.querySelector('[data-special-details]');
-    detailsLink.href = `/product.html?id=${encodeURIComponent(special.id)}`;
+    const chatBtn = specialSection.querySelector('[data-special-chat]');
+    chatBtn.dataset.id = special.id;
   }
 
   searchForm.addEventListener('submit', (e) => {

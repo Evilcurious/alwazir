@@ -1,7 +1,7 @@
 /* ============================================================
    ALWAZIR — cart drawer (home + product pages)
    The cart has a "Chat & Order on WhatsApp" button that sends
-   every item (name, description, price, image) to the store's
+   every item (name, description, price, quantity) to the store's
    WhatsApp number.
    ============================================================ */
 
@@ -33,22 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
   overlay.addEventListener('click', closeCart);
 
   /* ---------- helpers ---------- */
-  function absoluteUrl(url) {
-    if (!url) return '';
-    if (/^https?:\/\//i.test(url)) return url;
-    try {
-      return new URL(url, window.location.origin).href;
-    } catch (e) {
-      return url;
-    }
-  }
-
-  function whatsappNumber() {
-    const raw = (Alwazir.settings().whatsapp || '923174541414').toString();
-    const digits = raw.replace(/\D/g, '');
-    return digits || '923174541414';
-  }
-
   function buildOrderMessage() {
     const items = Alwazir.getCart();
     const brand = Alwazir.settings().brandName || 'alwazir';
@@ -66,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
       lines.push(`${i + 1}. ${it.name}`);
       lines.push(`💰 Price: ${Alwazir.formatMoney(it.price)}  × ${it.qty}`);
       if (it.description) lines.push(`📝 ${it.description}`);
-      if (it.image) lines.push(`🖼️ ${absoluteUrl(it.image)}`);
     });
 
     lines.push('');
@@ -75,8 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openWhatsApp() {
-    const url = `https://wa.me/${whatsappNumber()}?text=${encodeURIComponent(buildOrderMessage())}`;
-    window.open(url, '_blank', 'noopener');
+    Alwazir.openWhatsApp(buildOrderMessage());
   }
 
   /* ---------- render ---------- */
