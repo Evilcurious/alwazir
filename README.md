@@ -14,21 +14,25 @@ Then open http://localhost:3000
 
 ## Deploy to Vercel
 
-The app is Vercel-ready: the Express API runs as a serverless function (`api/index.js`),
-the pages/assets are served from `public/`, and data + image uploads live in **Vercel Blob**.
+The app is Vercel-ready with **zero configuration**: Vercel auto-detects the Express app
+in `index.js` and serves the pages/assets from `public/`. Data and image uploads are stored
+in **Vercel Blob**.
 
 ### Steps
 
-1. **Push this repo to GitHub** (it already is — see the `arena/01a08c34-alwazir` branch).
+1. **Make sure the code is on the branch you import.** Vercel imports a single branch
+   (default: `main`). All the website code lives on the `arena/01a08c34-alwazir` branch
+   (or `main` after merging the open pull request).
+   - When importing, pick that branch from the **"Branch"** dropdown, or merge the PR to `main` first.
 2. Go to [vercel.com/new](https://vercel.com/new) and **import the repository**.
-   - Vercel auto-detects the setup (`api/index.js` function + `public/` static).
-   - No build command or output directory is needed.
+   - Framework preset: **Other** (or it will be auto-detected as Express).
+   - No build command, no output directory — leave them blank.
 3. **Connect a Blob store** (required so the admin panel can save):
-   - In the project dashboard → **Storage** tab → **Create Blob store** → connect it to the project.
+   - Project dashboard → **Storage** tab → **Create Blob store** → connect it to the project.
    - This sets the `BLOB_READ_WRITE_TOKEN` environment variable automatically.
-4. **Redeploy** (the first import may happen before the Blob store is connected — just redeploy after step 3).
+4. **Redeploy** (if you connected Blob after the first import, deploy again).
 
-That's it. `alwazir.vercel.app` will show the store; open `/admin.html` to manage it.
+That's it. Your `*.vercel.app` URL shows the store; open `/admin.html` to manage it.
 
 > ⚠️ **Without a Blob store**, the site still works read-only (seed products are shown in
 > memory), but the admin panel cannot save changes or upload images. Connect Blob to unlock
@@ -38,8 +42,8 @@ That's it. `alwazir.vercel.app` will show the store; open `/admin.html` to manag
 
 | Concern | Local (`npm start`) | Vercel |
 | --- | --- | --- |
-| API | `server.js` listens on a port | `api/index.js` exports the Express app (serverless function) |
-| Routing | Express serves everything | `vercel.json` rewrites `/api/*` to the function; `public/` is served by the CDN |
+| API | `dev.js` listens on a port | `index.js` exports the Express app (auto-detected serverless function) |
+| Routing | Express serves everything | `public/` is served by the CDN; every other path goes to the Express function |
 | Database | `data/db.json` | `alwazir/db.json` in Vercel Blob |
 | Uploads | `public/uploads/` | `alwazir/uploads/*` in Vercel Blob |
 
@@ -75,8 +79,7 @@ The storage layer (`lib/store.js`) switches automatically based on
 
 ## Tech
 
-- `app.js` — the Express application (all routes, exported for both environments).
-- `server.js` — local development launcher (`npm start`).
-- `api/index.js` — Vercel serverless entry point.
+- `index.js` — the Express application (all routes, exported for both environments).
+- `dev.js` — local development launcher (`npm start`).
 - `lib/store.js` — storage abstraction (local JSON file vs Vercel Blob).
 - `public/` — the three pages, shared CSS and JS, and seed imagery.
