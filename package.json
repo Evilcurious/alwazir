@@ -1,0 +1,20 @@
+{
+  "name": "alwazir",
+  "version": "1.0.0",
+  "description": "Alwazir — luxury perfume oil storefront (gold & white)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.3.0"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
+  }
+}
