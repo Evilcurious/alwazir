@@ -103,7 +103,7 @@ app.get('/api/products/:id', async (req, res, next) => {
 app.post('/api/login', async (req, res, next) => {
   try {
     const db = await store.getData();
-    const key = (req.body && req.body.key) || '';
+    const key = ((req.body && req.body.key) || '').toString().trim();
     if (key && key === db.settings.adminKey) return res.json({ ok: true });
     res.status(401).json({ error: 'Incorrect password' });
   } catch (e) {

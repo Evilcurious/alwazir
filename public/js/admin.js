@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const key = field(loginForm, 'key').value;
+    const key = field(loginForm, 'key').value.trim();
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
