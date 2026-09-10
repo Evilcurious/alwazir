@@ -1,7 +1,7 @@
 /* Local development launcher (npm start / npm run dev).
-   On Vercel, index.js is auto-detected as the Express entrypoint instead. */
+   On Vercel, api/index.js (re-exporting lib/app.js) is used instead. */
 
-const app = require('./index');
+const app = require('./lib/app');
 const store = require('./lib/store');
 
 const PORT = process.env.PORT || 3000;

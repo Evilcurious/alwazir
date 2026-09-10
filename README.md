@@ -14,9 +14,9 @@ Then open http://localhost:3000
 
 ## Deploy to Vercel
 
-The app is Vercel-ready with **zero configuration**: Vercel auto-detects the Express app
-in `index.js` and serves the pages/assets from `public/`. Data and image uploads are stored
-in **Vercel Blob**.
+The app is Vercel-ready: the Express API runs as a serverless function
+(`api/index.js` → `lib/app.js`), the pages/assets are served from `public/`, and data +
+image uploads live in **Vercel Blob**.
 
 ### Steps
 
@@ -42,8 +42,8 @@ That's it. Your `*.vercel.app` URL shows the store; open `/admin.html` to manage
 
 | Concern | Local (`npm start`) | Vercel |
 | --- | --- | --- |
-| API | `dev.js` listens on a port | `index.js` exports the Express app (auto-detected serverless function) |
-| Routing | Express serves everything | `public/` is served by the CDN; every other path goes to the Express function |
+| API | `dev.js` listens on a port | `api/index.js` re-exports the Express app; `vercel.json` rewrites `/api/*` to it |
+| Routing | Express serves everything | `public/` is served by the CDN; `/api/*` goes to the function |
 | Database | `data/db.json` | `alwazir/db.json` in Vercel Blob |
 | Uploads | `public/uploads/` | `alwazir/uploads/*` in Vercel Blob |
 
@@ -79,7 +79,9 @@ The storage layer (`lib/store.js`) switches automatically based on
 
 ## Tech
 
-- `index.js` — the Express application (all routes, exported for both environments).
+- `lib/app.js` — the Express application (all routes, exported for both environments).
+- `api/index.js` — Vercel serverless entry point (re-exports `lib/app.js`).
+- `vercel.json` — rewrites `/api/*` to `api/index.js`.
 - `dev.js` — local development launcher (`npm start`).
 - `lib/store.js` — storage abstraction (local JSON file vs Vercel Blob).
 - `public/` — the three pages, shared CSS and JS, and seed imagery.

@@ -61,23 +61,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const key = field(loginForm, 'key').value.trim();
+    if (!key) {
+      Alwazir.toast('Please enter the password');
+      return;
+    }
+    let res;
     try {
-      const res = await fetch('/api/login', {
+      res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key })
       });
-      if (!res.ok) {
-        Alwazir.toast('Incorrect password');
+    } catch (err) {
+      Alwazir.toast('Could not reach the server. Is the site deployed correctly?');
+      return;
+    }
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      const msg =
+        res.status === 401
+          ? 'Incorrect password'
+          : data.error || `Login failed (HTTP ${res.status})`;
+      Alwazir.toast(msg);
+      return;
+    }
+
+    localStorage.setItem(AUTH_KEY, key);
+    try {
+      const adminRes = await fetch('/api/admin', { headers: { 'x-admin-key': key } });
+      if (!adminRes.ok) {
+        const errData = await adminRes.json().catch(() => ({}));
+        Alwazir.toast(errData.error || `Could not load data (HTTP ${adminRes.status})`);
         return;
       }
-      localStorage.setItem(AUTH_KEY, key);
-      const data = await (await fetch('/api/admin', { headers: { 'x-admin-key': key } })).json();
+      const data = await adminRes.json();
       settings = data.settings;
       products = data.products;
       enterDashboard();
     } catch (err) {
-      Alwazir.toast('Could not sign in. Is the server running?');
+      Alwazir.toast('Could not load admin data. Is the server running?');
     }
   });
 
