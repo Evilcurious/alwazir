@@ -2,5 +2,6 @@ node_modules/
 data/
 public/uploads/*
 !public/uploads/.gitkeep
+.vercel/
 *.log
 .DS_Store
