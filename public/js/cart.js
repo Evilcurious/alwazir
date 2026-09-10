@@ -1,5 +1,8 @@
 /* ============================================================
    ALWAZIR — cart drawer (home + product pages)
+   The cart has a "Chat & Order on WhatsApp" button that sends
+   every item (name, description, price, image) to the store's
+   WhatsApp number.
    ============================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const itemsEl = drawer.querySelector('[data-cart-items]');
   const totalEl = drawer.querySelector('[data-cart-total]');
-  const form = drawer.querySelector('[data-checkout-form]');
+  const waBtn = drawer.querySelector('[data-whatsapp-order]');
   const clearBtn = drawer.querySelector('[data-cart-clear]');
 
   function openCart() {
@@ -29,19 +32,64 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('[data-cart-close]').addEventListener('click', closeCart);
   overlay.addEventListener('click', closeCart);
 
+  /* ---------- helpers ---------- */
+  function absoluteUrl(url) {
+    if (!url) return '';
+    if (/^https?:\/\//i.test(url)) return url;
+    try {
+      return new URL(url, window.location.origin).href;
+    } catch (e) {
+      return url;
+    }
+  }
+
+  function whatsappNumber() {
+    const raw = (Alwazir.settings().whatsapp || '923174541414').toString();
+    const digits = raw.replace(/\D/g, '');
+    return digits || '923174541414';
+  }
+
+  function buildOrderMessage() {
+    const items = Alwazir.getCart();
+    const brand = Alwazir.settings().brandName || 'alwazir';
+    const lines = [];
+    lines.push(`🛍️ *New Order — ${brand}*`);
+
+    if (items.length === 0) {
+      lines.push('');
+      lines.push("Hi! I'd like to know more about your perfume oils.");
+      return lines.join('\n');
+    }
+
+    items.forEach((it, i) => {
+      lines.push('');
+      lines.push(`${i + 1}. ${it.name}`);
+      lines.push(`💰 Price: ${Alwazir.formatMoney(it.price)}  × ${it.qty}`);
+      if (it.description) lines.push(`📝 ${it.description}`);
+      if (it.image) lines.push(`🖼️ ${absoluteUrl(it.image)}`);
+    });
+
+    lines.push('');
+    lines.push(`💳 *Total: ${Alwazir.formatMoney(Alwazir.cartTotal())}*`);
+    return lines.join('\n');
+  }
+
+  function openWhatsApp() {
+    const url = `https://wa.me/${whatsappNumber()}?text=${encodeURIComponent(buildOrderMessage())}`;
+    window.open(url, '_blank', 'noopener');
+  }
+
+  /* ---------- render ---------- */
   function render() {
     const items = Alwazir.getCart();
     totalEl.textContent = Alwazir.formatMoney(Alwazir.cartTotal());
+    clearBtn.classList.toggle('hidden', items.length === 0);
 
     if (items.length === 0) {
       itemsEl.innerHTML = '<div class="cart-empty">Your cart is empty.<br>Add a fragrance to begin.</div>';
-      form.classList.add('hidden');
-      clearBtn.classList.add('hidden');
       return;
     }
 
-    form.classList.remove('hidden');
-    clearBtn.classList.remove('hidden');
     itemsEl.innerHTML = items
       .map(
         (it) => `
@@ -61,6 +109,15 @@ document.addEventListener('DOMContentLoaded', () => {
       )
       .join('');
   }
+
+  /* ---------- events ---------- */
+  waBtn.addEventListener('click', () => {
+    if (Alwazir.getCart().length === 0) {
+      Alwazir.toast('Your cart is empty — add a fragrance first');
+      return;
+    }
+    openWhatsApp();
+  });
 
   itemsEl.addEventListener('click', (e) => {
     const itemEl = e.target.closest('.cart-item');
@@ -83,31 +140,5 @@ document.addEventListener('DOMContentLoaded', () => {
   clearBtn.addEventListener('click', () => {
     Alwazir.clearCart();
     render();
-  });
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = form.elements.namedItem('name').value.trim();
-    const phone = form.elements.namedItem('phone').value.trim();
-    if (!name || !phone) return;
-    const total = Alwazir.cartTotal();
-    const items = Alwazir.getCart();
-    const msg = encodeURIComponent(
-      `Hello! I'd like to order:\n\n${items.map((i) => `• ${i.name} x${i.qty} — ${Alwazir.formatMoney(i.price * i.qty)}`).join('\n')}\n\nTotal: ${Alwazir.formatMoney(total)}\n\nName: ${name}\nPhone: ${phone}`
-    );
-    // WhatsApp-order convenience link
-    const wa = window.open(`https://wa.me/?text=${msg}`, '_blank');
-    Alwazir.toast('Order prepared — confirm via WhatsApp');
-    Alwazir.clearCart();
-    render();
-    if (!wa) {
-      itemsEl.innerHTML = `<div class="checkout-success">
-        <div class="tick">&#10004;</div>
-        <h3>Order received!</h3>
-        <p>Thank you, ${Alwazir.escapeHtml(name)}. We'll contact you shortly.</p>
-      </div>`;
-      form.classList.add('hidden');
-      clearBtn.classList.add('hidden');
-    }
   });
 });

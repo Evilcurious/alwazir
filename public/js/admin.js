@@ -161,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     field(form, 'brandName').value = settings.brandName || '';
     field(form, 'tagline').value = settings.tagline || '';
     field(form, 'currency').value = settings.currency || '$';
+    field(form, 'whatsapp').value = settings.whatsapp || '';
   }
 
   function renderThemePicker() {
@@ -342,6 +343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       brandName: field(form, 'brandName').value,
       tagline: field(form, 'tagline').value,
       currency: field(form, 'currency').value,
+      whatsapp: field(form, 'whatsapp').value,
       theme: document.querySelector('.theme-card.selected')?.dataset.theme || 'gold'
     };
     if (pendingLogoUrl) payload.logo = pendingLogoUrl;

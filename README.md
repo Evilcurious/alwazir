@@ -60,7 +60,7 @@ The storage layer (`lib/store.js`) switches automatically based on
 
 ## Admin access
 
-- **Default password:** `alwazir123`
+- **Default password:** `evil123`
 - Change it from the **Security** tab in the admin panel.
 
 > ⚠️ This is a lightweight single-admin demo store. The password gate is intentionally

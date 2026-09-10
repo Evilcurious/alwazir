@@ -3,7 +3,7 @@
    ============================================================ */
 
 const Alwazir = (() => {
-  let settings = { brandName: 'alwazir', tagline: '', logo: '', currency: '$', theme: 'gold' };
+  let settings = { brandName: 'alwazir', tagline: '', logo: '', currency: '$', theme: 'gold', whatsapp: '923174541414' };
 
   /* ---------- currency formatting ---------- */
   function formatMoney(price) {
@@ -92,8 +92,21 @@ const Alwazir = (() => {
   function addToCart(product, qty = 1) {
     const items = loadCart();
     const existing = items.find((it) => it.id === product.id);
-    if (existing) existing.qty += qty;
-    else items.push({ id: product.id, name: product.name, price: product.price, image: product.image, qty });
+    if (existing) {
+      existing.qty += qty;
+      // keep the freshest description / image available
+      if (product.description) existing.description = product.description;
+      if (product.image) existing.image = product.image;
+    } else {
+      items.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        description: product.description || '',
+        qty
+      });
+    }
     saveCart(items);
     toast(`Added "${product.name}" to cart`);
   }
@@ -217,7 +230,10 @@ const Alwazir = (() => {
   }
 
   /* ---------- boot ---------- */
+  let booted = false;
   async function boot() {
+    if (booted) return;
+    booted = true;
     await loadSettings();
     renderCartCount();
     wireActions();

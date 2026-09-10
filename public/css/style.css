@@ -426,6 +426,19 @@ input, textarea, select {
 
 .btn-danger:hover { background: var(--danger); color: #fff; }
 
+.btn-whatsapp {
+  background: #25d366;
+  color: #0b3d20;
+  box-shadow: 0 10px 24px rgba(37, 211, 102, 0.35);
+}
+
+.btn-whatsapp:hover {
+  background: #1fb958;
+  color: #0b3d20;
+  transform: translateY(-2px);
+  filter: none;
+}
+
 .btn-block { width: 100%; }
 
 /* ---------- product grid (2 per full screen) ---------- */
@@ -793,22 +806,6 @@ input, textarea, select {
 }
 
 .cart-total-row .amount { font-family: var(--font-display); font-size: 1.4rem; color: var(--accent-strong); }
-
-.checkout-form { display: flex; flex-direction: column; gap: 10px; }
-
-.checkout-form input {
-  border: 1px solid var(--border);
-  background: var(--input-bg);
-  border-radius: 10px;
-  padding: 12px 14px;
-  outline: none;
-  font-size: 0.92rem;
-}
-
-.checkout-form input:focus { border-color: var(--accent); }
-
-.checkout-success { text-align: center; padding: 20px 6px; }
-.checkout-success .tick { font-size: 2.6rem; }
 
 /* ---------- toast ---------- */
 .toast {
