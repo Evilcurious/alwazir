@@ -8,7 +8,11 @@ The app has **two storage modes**, chosen automatically:
 | Mode | When | Database | Image uploads |
 | --- | --- | --- | --- |
 | **local** | no Blob token set (default) | `data/db.json` | `public/uploads/` |
-| **blob** | `BLOB_READ_WRITE_TOKEN` set (Vercel) | `alwazir/db.json` in Vercel Blob (private) | `alwazir/uploads/*` in Vercel Blob (public) |
+| **blob** | `BLOB_READ_WRITE_TOKEN` set (Vercel) | `alwazir/db.json` in Vercel Blob | `alwazir/uploads/*` in Vercel Blob (public) |
+
+The Blob code auto-detects whether your store is **public** or **private** and uses
+the matching access mode — so it works with either. Image uploads need a **public**
+store (so the images can be shown directly on the store).
 
 ---
 
@@ -57,6 +61,28 @@ takes effect.
 That's it — the admin panel now saves products, settings, and **image uploads**
 (they're stored in Blob and served from Vercel's CDN). Open `/admin.html` to manage
 the store. Default password: `evil123`.
+
+### Verify the connection
+
+After deploying, open:
+
+```
+https://YOUR-SITE.vercel.app/api/status
+```
+
+- `{"mode":"blob","blobConnected":true,"storeAccess":"public"}` → ✅ connected to a public store
+- `{"mode":"blob","blobConnected":true,"storeAccess":"private"}` → ✅ connected to a private store
+- `{"mode":"blob","blobConnected":false,...}` → token set but Blob unreachable (wrong token / not linked)
+- `{"mode":"local","blobConnected":false,...}` → no `BLOB_READ_WRITE_TOKEN` set yet
+
+### ⚠️ Note about public stores
+
+A **public** Blob store works fine for uploads, but the database file
+(`alwazir/db.json`) — which contains your admin password — is then readable by
+anyone who knows its URL. For a small demo this is usually fine, but if you want
+the admin password to stay private, create a **private** Blob store instead
+(the app supports both). Either way, the admin login is a simple password gate and
+should not be treated as strong security.
 
 ### How the app decides the mode
 
