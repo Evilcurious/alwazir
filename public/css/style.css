@@ -4,6 +4,7 @@
 
 :root {
   --font-display: 'Playfair Display', 'Georgia', serif;
+  --font-brand: 'Playfair Display', 'Georgia', serif;
   --font-body: 'Inter', -apple-system, 'Segoe UI', sans-serif;
 
   --bg: #ffffff;
@@ -113,6 +114,26 @@ body[data-theme='dark'] {
   --danger: #ff7a85;
 }
 
+body[data-theme='bw'] {
+  --bg: #0a0a0a;
+  --bg-soft: #141414;
+  --card: #121212;
+  --text: #ffffff;
+  --muted: #b5b5b5;
+  --accent: #ffffff;
+  --accent-strong: #f2f2f2;
+  --accent-soft: #222222;
+  --accent-ghost: rgba(255, 255, 255, 0.10);
+  --border: #2c2c2c;
+  --gold-gradient: linear-gradient(135deg, #ffffff 0%, #e6e6e6 50%, #c4c4c4 100%);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --on-accent: #000000;
+  --header-bg: rgba(10, 10, 10, 0.9);
+  --input-bg: #141414;
+  --danger: #ff7a85;
+}
+
 /* ---------- text style: selectable fonts ---------- */
 body[data-font='poppins'] { --font-body: 'Poppins', 'Inter', sans-serif; }
 body[data-font='lora'] { --font-body: 'Lora', Georgia, serif; }
@@ -120,6 +141,14 @@ body[data-font='montserrat'] { --font-body: 'Montserrat', 'Inter', sans-serif; }
 body[data-font='opensans'] { --font-body: 'Open Sans', 'Inter', sans-serif; }
 body[data-font='nunito'] { --font-body: 'Nunito', 'Inter', sans-serif; }
 body[data-font='raleway'] { --font-body: 'Raleway', 'Inter', sans-serif; }
+
+/* ---------- brand name font ---------- */
+body[data-brand-font='poppins'] { --font-brand: 'Poppins', 'Playfair Display', serif; }
+body[data-brand-font='lora'] { --font-brand: 'Lora', Georgia, serif; }
+body[data-brand-font='montserrat'] { --font-brand: 'Montserrat', 'Playfair Display', serif; }
+body[data-brand-font='opensans'] { --font-brand: 'Open Sans', 'Playfair Display', serif; }
+body[data-brand-font='nunito'] { --font-brand: 'Nunito', 'Playfair Display', serif; }
+body[data-brand-font='raleway'] { --font-brand: 'Raleway', 'Playfair Display', serif; }
 
 /* ---------- text style: bold ---------- */
 body[data-bold='true'] { font-weight: 700; }
@@ -219,7 +248,7 @@ input, textarea, select {
 }
 
 .brand-name {
-  font-family: var(--font-display);
+  font-family: var(--font-brand);
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -286,7 +315,7 @@ input, textarea, select {
 }
 
 .hero-brand {
-  font-family: var(--font-display);
+  font-family: var(--font-brand);
   font-size: clamp(3rem, 8vw, 5.5rem);
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -894,7 +923,7 @@ input, textarea, select {
 }
 
 .site-footer .brand-name {
-  font-family: var(--font-display);
+  font-family: var(--font-brand);
   font-size: 1.15rem;
   margin-bottom: 6px;
   color: var(--text);
@@ -1252,6 +1281,9 @@ input, textarea, select {
 
 .theme-dark .sw1 { background: #0a0e0b; }
 .theme-dark .sw2 { background: #25d366; }
+
+.theme-bw .sw1 { background: #0a0a0a; }
+.theme-bw .sw2 { background: #ffffff; }
 
 /* font picker cards (admin) */
 .font-card { font-size: 0.9rem; }

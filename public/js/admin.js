@@ -125,6 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderThemePicker();
     renderMobileToggle();
     renderFontPicker();
+    renderBrandFontPicker();
     renderBoldToggle();
     renderLogoPreview();
   }
@@ -182,8 +183,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderFontPicker() {
     const font = settings.fontFamily || 'default';
-    document.querySelectorAll('.font-card').forEach((card) => {
+    document.querySelectorAll('[data-font-grid] .font-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.font === font);
+    });
+  }
+
+  function renderBrandFontPicker() {
+    const font = settings.brandFont || 'default';
+    document.querySelectorAll('[data-brand-font-grid] .font-card').forEach((card) => {
+      card.classList.toggle('selected', card.dataset.brandFont === font);
     });
   }
 
@@ -370,7 +378,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       whatsapp: field(form, 'whatsapp').value,
       theme: document.querySelector('.theme-card.selected')?.dataset.theme || 'gold',
       mobileColumns: document.querySelector('[data-mobile-toggle] .mode-card.selected')?.dataset.mode || 'double',
-      fontFamily: document.querySelector('.font-card.selected')?.dataset.font || 'default',
+      fontFamily: document.querySelector('[data-font-grid] .font-card.selected')?.dataset.font || 'default',
+      brandFont: document.querySelector('[data-brand-font-grid] .font-card.selected')?.dataset.brandFont || 'default',
       textBold: document.querySelector('[data-bold-toggle] .mode-card.selected')?.dataset.bold === 'true'
     };
     if (pendingLogoUrl) payload.logo = pendingLogoUrl;
@@ -415,12 +424,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelector('[data-font-grid]').addEventListener('click', (e) => {
     const card = e.target.closest('.font-card');
     if (!card) return;
-    document.querySelectorAll('.font-card').forEach((c) => c.classList.remove('selected'));
+    document.querySelectorAll('[data-font-grid] .font-card').forEach((c) => c.classList.remove('selected'));
     card.classList.add('selected');
     // live preview the font on the admin page
     const font = card.dataset.font;
     if (font && font !== 'default') document.body.setAttribute('data-font', font);
     else document.body.removeAttribute('data-font');
+  });
+
+  document.querySelector('[data-brand-font-grid]').addEventListener('click', (e) => {
+    const card = e.target.closest('.font-card');
+    if (!card) return;
+    document.querySelectorAll('[data-brand-font-grid] .font-card').forEach((c) => c.classList.remove('selected'));
+    card.classList.add('selected');
+    // live preview the brand name font on the admin page
+    const font = card.dataset.brandFont;
+    if (font && font !== 'default') document.body.setAttribute('data-brand-font', font);
+    else document.body.removeAttribute('data-brand-font');
   });
 
   document.querySelector('[data-bold-toggle]').addEventListener('click', (e) => {
