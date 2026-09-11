@@ -1185,9 +1185,14 @@ input, textarea, select {
 
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
-  .grid { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
   .product-card { min-height: auto; }
-  .product-media { min-height: 340px; }
+  .product-media { min-height: 230px; }
+  .product-body { padding: 20px 20px 24px; }
+  .product-name { font-size: 1.4rem; }
+  .product-foot { flex-direction: column; align-items: stretch; gap: 12px; }
+  .product-actions { width: 100%; }
+  .product-actions .btn { flex: 1; }
 
   .details-layout { grid-template-columns: 1fr; gap: 32px; }
   .details-media { position: static; }
@@ -1233,20 +1238,20 @@ input, textarea, select {
   .section-title { font-size: 1.5rem; }
   .section-sub { font-size: 0.88rem; margin-bottom: 26px; padding: 0 8px; }
 
-  /* ---------- catalog / product cards ---------- */
-  .catalog { padding: 40px 0 60px; }
-  .grid { gap: 22px; }
-  .product-media { min-height: 260px; }
-  .badge { top: 10px; left: 10px; padding: 5px 11px; font-size: 0.66rem; }
-  .badge-special { right: 10px; }
-  .product-body { padding: 18px 18px 22px; gap: 10px; }
-  .product-category { font-size: 0.68rem; letter-spacing: 0.18em; }
-  .product-name { font-size: 1.35rem; }
-  .product-desc { font-size: 0.88rem; }
-  .product-foot { flex-direction: column; align-items: stretch; gap: 12px; }
-  .product-price { font-size: 1.3rem; }
-  .product-actions { width: 100%; }
-  .product-actions .btn { flex: 1; padding: 12px 14px; font-size: 0.85rem; }
+  /* ---------- catalog / product cards (2 per row, like desktop) ---------- */
+  .catalog { padding: 36px 0 56px; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .product-media { min-height: 0; aspect-ratio: 1 / 1; }
+  .badge { top: 8px; left: 8px; padding: 4px 8px; font-size: 0.58rem; letter-spacing: 0.08em; }
+  .badge-special { right: 8px; }
+  .product-body { padding: 12px 12px 14px; gap: 7px; }
+  .product-category { font-size: 0.6rem; letter-spacing: 0.14em; }
+  .product-name { font-size: 1.05rem; }
+  .product-desc { font-size: 0.78rem; }
+  .product-foot { flex-direction: column; align-items: stretch; gap: 10px; }
+  .product-price { font-size: 1.05rem; }
+  .product-actions { width: 100%; flex-direction: column; gap: 8px; }
+  .product-actions .btn { padding: 10px 8px; font-size: 0.8rem; }
 
   /* ---------- special offer ---------- */
   .special-section { padding: 40px 0 0; }
