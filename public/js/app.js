@@ -58,17 +58,17 @@ const Alwazir = (() => {
   }
 
   function applySettings() {
-    const body = document.body;
-    body.setAttribute('data-theme', settings.theme || 'gold');
-    body.setAttribute('data-mobile-columns', settings.mobileColumns === 'single' ? 'single' : 'double');
+    const root = document.documentElement;
+    root.setAttribute('data-theme', settings.theme || 'gold');
+    root.setAttribute('data-mobile-columns', settings.mobileColumns === 'single' ? 'single' : 'double');
 
     const font = settings.fontFamily && settings.fontFamily !== 'default' ? settings.fontFamily : null;
-    if (font) body.setAttribute('data-font', font);
-    else body.removeAttribute('data-font');
+    if (font) root.setAttribute('data-font', font);
+    else root.removeAttribute('data-font');
     const brandFont = settings.brandFont && settings.brandFont !== 'default' ? settings.brandFont : null;
-    if (brandFont) body.setAttribute('data-brand-font', brandFont);
-    else body.removeAttribute('data-brand-font');
-    body.setAttribute('data-bold', settings.textBold ? 'true' : 'false');
+    if (brandFont) root.setAttribute('data-brand-font', brandFont);
+    else root.removeAttribute('data-brand-font');
+    root.setAttribute('data-bold', settings.textBold ? 'true' : 'false');
 
     document.querySelectorAll('[data-brand]').forEach((el) => {
       el.textContent = settings.brandName || 'alwazir';

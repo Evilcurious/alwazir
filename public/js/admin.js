@@ -30,6 +30,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     return form.elements.namedItem(name);
   }
 
+  // Accepts a full http(s) URL or a root-relative path like /uploads/x.png.
+  function validImageUrl(raw) {
+    const v = (raw || '').trim();
+    if (!v) return false;
+    if (v.charAt(0) === '/') return true;
+    try {
+      const u = new URL(v);
+      return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch (e) {
+      return false;
+    }
+  }
+
   /* ---------- auth flow ---------- */
   function showLogin() {
     loginScreen.classList.remove('hidden');
@@ -210,6 +223,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       img.classList.add('hidden');
     }
+    const urlInput = document.querySelector('[data-logo-url]');
+    if (urlInput) urlInput.value = settings.logo || '';
   }
 
   /* ---------- product CRUD ---------- */
@@ -236,6 +251,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     field(form, 'description').value = product ? (product.description || '') : '';
     field(form, 'popular').checked = product ? !!product.popular : false;
     field(form, 'special').checked = product ? !!product.special : false;
+    const urlInput = document.querySelector('[data-image-url]');
+    if (urlInput) urlInput.value = (product && product.image) || '';
     const preview = document.querySelector('[data-image-preview]');
     if (product && product.image) {
       preview.src = product.image;
@@ -260,6 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // image upload within product modal
   const imageDrop = document.querySelector('[data-image-drop]');
   const imageFile = document.querySelector('[data-image-file]');
+  const imageUrlInput = document.querySelector('[data-image-url]');
   imageDrop.addEventListener('click', () => imageFile.click());
   imageFile.addEventListener('change', async () => {
     const file = imageFile.files[0];
@@ -270,8 +288,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       const preview = document.querySelector('[data-image-preview]');
       preview.src = url;
       preview.classList.remove('hidden');
+      if (imageUrlInput) imageUrlInput.value = url;
       Alwazir.toast('Image uploaded');
     }
+  });
+  imageUrlInput.addEventListener('change', () => {
+    const v = imageUrlInput.value.trim();
+    if (!v) return;
+    if (!validImageUrl(v)) {
+      Alwazir.toast('Please enter a valid image URL (https://…)');
+      return;
+    }
+    editingImageUrl = v;
+    const preview = document.querySelector('[data-image-preview]');
+    preview.src = v;
+    preview.classList.remove('hidden');
+    imageFile.value = '';
+    Alwazir.toast('Image URL applied');
   });
 
   async function uploadFile(file) {
@@ -411,7 +444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('[data-theme-grid] .theme-card').forEach((c) => c.classList.remove('selected'));
     card.classList.add('selected');
     // live preview the theme on the admin page
-    document.body.setAttribute('data-theme', card.dataset.theme);
+    document.documentElement.setAttribute('data-theme', card.dataset.theme);
   });
 
   document.querySelector('[data-mobile-toggle]').addEventListener('click', (e) => {
@@ -428,8 +461,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     card.classList.add('selected');
     // live preview the font on the admin page
     const font = card.dataset.font;
-    if (font && font !== 'default') document.body.setAttribute('data-font', font);
-    else document.body.removeAttribute('data-font');
+    if (font && font !== 'default') document.documentElement.setAttribute('data-font', font);
+    else document.documentElement.removeAttribute('data-font');
   });
 
   document.querySelector('[data-brand-font-grid]').addEventListener('click', (e) => {
@@ -439,8 +472,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     card.classList.add('selected');
     // live preview the brand name font on the admin page
     const font = card.dataset.brandFont;
-    if (font && font !== 'default') document.body.setAttribute('data-brand-font', font);
-    else document.body.removeAttribute('data-brand-font');
+    if (font && font !== 'default') document.documentElement.setAttribute('data-brand-font', font);
+    else document.documentElement.removeAttribute('data-brand-font');
   });
 
   document.querySelector('[data-bold-toggle]').addEventListener('click', (e) => {
@@ -449,11 +482,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('[data-bold-toggle] .mode-card').forEach((c) => c.classList.remove('selected'));
     card.classList.add('selected');
     // live preview the weight on the admin page
-    document.body.setAttribute('data-bold', card.dataset.bold === 'true' ? 'true' : 'false');
+    document.documentElement.setAttribute('data-bold', card.dataset.bold === 'true' ? 'true' : 'false');
   });
 
   const logoDrop = document.querySelector('[data-logo-drop]');
   const logoFile = document.querySelector('[data-logo-file]');
+  const logoUrlInput = document.querySelector('[data-logo-url]');
   logoDrop.addEventListener('click', () => logoFile.click());
   logoFile.addEventListener('change', async () => {
     const file = logoFile.files[0];
@@ -464,8 +498,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       const preview = document.querySelector('[data-logo-preview]');
       preview.src = url;
       preview.classList.remove('hidden');
+      if (logoUrlInput) logoUrlInput.value = url;
       Alwazir.toast('Logo uploaded — click Save Changes to apply');
     }
+  });
+  logoUrlInput.addEventListener('change', () => {
+    const v = logoUrlInput.value.trim();
+    if (!v) return;
+    if (!validImageUrl(v)) {
+      Alwazir.toast('Please enter a valid logo URL (https://…)');
+      return;
+    }
+    pendingLogoUrl = v;
+    const preview = document.querySelector('[data-logo-preview]');
+    preview.src = v;
+    preview.classList.remove('hidden');
+    logoFile.value = '';
+    Alwazir.toast('Logo URL applied — click Save Changes to apply');
   });
 
   /* ---------- security ---------- */
