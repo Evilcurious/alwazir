@@ -134,6 +134,46 @@ html[data-theme='bw'] {
   --danger: #ff7a85;
 }
 
+html[data-theme='blackemerald'] {
+  --bg: #060a08;
+  --bg-soft: #0b110e;
+  --card: #0d140f;
+  --text: #e9f6ef;
+  --muted: #94a89d;
+  --accent: #10b981;
+  --accent-strong: #34d399;
+  --accent-soft: #0b2b1e;
+  --accent-ghost: rgba(16, 185, 129, 0.12);
+  --border: #1c2f25;
+  --gold-gradient: linear-gradient(135deg, #6ee7b7 0%, #10b981 50%, #047857 100%);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --on-accent: #04281c;
+  --header-bg: rgba(6, 10, 8, 0.9);
+  --input-bg: #0d140f;
+  --danger: #ff7a85;
+}
+
+html[data-theme='silveremerald'] {
+  --bg: #f2f4f5;
+  --bg-soft: #e7ebec;
+  --card: #fbfcfc;
+  --text: #1e2a25;
+  --muted: #6b7a73;
+  --accent: #0f9d72;
+  --accent-strong: #0b7f5c;
+  --accent-soft: #dcebe4;
+  --accent-ghost: rgba(15, 157, 114, 0.10);
+  --border: #d3ddd8;
+  --gold-gradient: linear-gradient(135deg, #8a9a95 0%, #0f9d72 50%, #047857 100%);
+  --shadow: 0 24px 60px rgba(70, 90, 82, 0.16);
+  --shadow-sm: 0 8px 24px rgba(70, 90, 82, 0.12);
+  --on-accent: #ffffff;
+  --header-bg: rgba(242, 244, 245, 0.92);
+  --input-bg: #ffffff;
+  --danger: #c53a48;
+}
+
 /* ---------- text style: selectable fonts ---------- */
 html[data-font='poppins'] { --font-body: 'Poppins', 'Inter', sans-serif; }
 html[data-font='lora'] { --font-body: 'Lora', Georgia, serif; }
@@ -1283,6 +1323,12 @@ input, textarea, select {
 
 .theme-bw .sw1 { background: #0a0a0a; }
 .theme-bw .sw2 { background: #ffffff; }
+
+.theme-blackemerald .sw1 { background: #060a08; }
+.theme-blackemerald .sw2 { background: #10b981; }
+
+.theme-silveremerald .sw1 { background: #f2f4f5; }
+.theme-silveremerald .sw2 { background: #0f9d72; }
 
 /* font picker cards (admin) */
 .font-card { font-size: 0.9rem; }
