@@ -42,6 +42,12 @@ const Alwazir = (() => {
 
   /* ---------- settings & theme ---------- */
   async function loadSettings() {
+    // 1. Server-injected preload (set before first paint) — apply instantly.
+    if (window.__ALWAZIR_SETTINGS__) {
+      settings = { ...settings, ...window.__ALWAZIR_SETTINGS__ };
+      applySettings();
+    }
+    // 2. Then fetch the freshest values from the API.
     try {
       const res = await fetch('/api/settings');
       if (res.ok) settings = { ...settings, ...(await res.json()) };
@@ -330,5 +336,11 @@ const Alwazir = (() => {
 
 if (typeof window !== 'undefined') {
   window.__products = window.__products || {};
-  document.addEventListener('DOMContentLoaded', () => Alwazir.boot());
+  // Boot as soon as the body is available (scripts are at the end of the body),
+  // so brand name / tagline / logo are applied before first paint too.
+  if (document.body) {
+    Alwazir.boot();
+  } else {
+    document.addEventListener('DOMContentLoaded', () => Alwazir.boot());
+  }
 }
