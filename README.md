@@ -131,6 +131,12 @@ So the exact same code runs locally and on Vercel with zero changes.
   currency symbol.
 - **Product images** — upload an image file **or paste an image URL** (both work),
   directly from the admin panel.
+- **Link preview** — when the site link is shared (WhatsApp, Facebook, Twitter),
+  it shows the brand name + logo. The preview **title, description and image**
+  are customizable from the admin panel (Brand & Theme).
+- **Image limit** — at most 5 uploaded images are kept; when a 6th is uploaded,
+  the **most-unused** image (not used by any product/logo/preview, oldest first)
+  is deleted automatically.
 - **Cart** — add to cart, adjust quantities, and order via WhatsApp chat.
 
 ## How it's organized
@@ -139,8 +145,10 @@ So the exact same code runs locally and on Vercel with zero changes.
 - `lib/app.js` — the Express application (all routes).
 - `lib/store.js` — storage layer (local JSON file ↔ Vercel Blob).
 - `api/index.js` — Vercel serverless entry point.
-- `vercel.json` — routes pages + `/api/*` through the function, includes `public/**`.
-- `public/` — the three pages, shared CSS and JS, and seed imagery.
+- `vercel.json` — routes pages + `/api/*` through the function, includes `views/**` and `public/**`.
+- `views/` — the three HTML pages (served through Express so the current theme
+  and link-preview tags are injected before first paint — no theme flash).
+- `public/` — shared CSS, JS, and seed imagery (static assets).
 - `data/db.json` — local database (local mode only; auto-created).
 
 ## Notes

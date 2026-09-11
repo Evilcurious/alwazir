@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let settings = {};
   let editingImageUrl = null; // holds chosen image while editing a product
   let pendingLogoUrl = null;
+  let pendingShareImageUrl = null;
 
   function getAuth() {
     return localStorage.getItem(AUTH_KEY);
@@ -180,6 +181,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     field(form, 'tagline').value = settings.tagline || '';
     field(form, 'currency').value = settings.currency || '$';
     field(form, 'whatsapp').value = settings.whatsapp || '';
+    field(form, 'shareTitle').value = settings.shareTitle || '';
+    field(form, 'shareDescription').value = settings.shareDescription || '';
+    const shareUrl = document.querySelector('[data-share-image-url]');
+    if (shareUrl) shareUrl.value = settings.shareImage || '';
+    const sharePrev = document.querySelector('[data-share-image-preview]');
+    if (sharePrev) {
+      if (settings.shareImage) {
+        sharePrev.src = settings.shareImage;
+        sharePrev.classList.remove('hidden');
+      } else {
+        sharePrev.classList.add('hidden');
+        sharePrev.removeAttribute('src');
+      }
+    }
   }
 
   function renderThemePicker() {
@@ -438,6 +453,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       tagline: field(form, 'tagline').value,
       currency: field(form, 'currency').value,
       whatsapp: field(form, 'whatsapp').value,
+      shareTitle: field(form, 'shareTitle').value,
+      shareDescription: field(form, 'shareDescription').value,
       theme: document.querySelector('.theme-card.selected')?.dataset.theme || 'gold',
       mobileColumns: document.querySelector('[data-mobile-toggle] .mode-card.selected')?.dataset.mode || 'double',
       fontFamily: document.querySelector('[data-font-grid] .font-card.selected')?.dataset.font || 'default',
@@ -445,6 +462,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       textBold: document.querySelector('[data-bold-toggle] .mode-card.selected')?.dataset.bold === 'true'
     };
     if (pendingLogoUrl) payload.logo = pendingLogoUrl;
+    if (pendingShareImageUrl) payload.shareImage = pendingShareImageUrl;
     try {
       const res = await fetch('/api/settings', {
         method: 'PUT',
@@ -458,6 +476,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       settings = data;
       pendingLogoUrl = null;
+      pendingShareImageUrl = null;
       Alwazir.toast('Settings saved');
       renderAll();
       // refresh the storefront theme/font/bold cache and re-apply
@@ -544,6 +563,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     preview.classList.remove('hidden');
     logoFile.value = '';
     Alwazir.toast('Logo URL applied — click Save Changes to apply');
+  });
+
+  // Link-preview (share) image: upload or URL
+  const shareImageDrop = document.querySelector('[data-share-image-drop]');
+  const shareImageFile = document.querySelector('[data-share-image-file]');
+  const shareImageUrlInput = document.querySelector('[data-share-image-url]');
+  shareImageDrop.addEventListener('click', () => shareImageFile.click());
+  shareImageFile.addEventListener('change', async () => {
+    const file = shareImageFile.files[0];
+    if (!file) return;
+    const url = await uploadFile(file);
+    if (url) {
+      pendingShareImageUrl = url;
+      const preview = document.querySelector('[data-share-image-preview]');
+      preview.src = url;
+      preview.classList.remove('hidden');
+      if (shareImageUrlInput) shareImageUrlInput.value = url;
+      Alwazir.toast('Preview image uploaded — click Save Changes to apply');
+    }
+  });
+  shareImageUrlInput.addEventListener('change', () => {
+    const v = shareImageUrlInput.value.trim();
+    if (!v) return;
+    if (!validImageUrl(v)) {
+      Alwazir.toast('Please enter a valid image URL (https://…)');
+      return;
+    }
+    pendingShareImageUrl = v;
+    const preview = document.querySelector('[data-share-image-preview]');
+    preview.src = v;
+    preview.classList.remove('hidden');
+    shareImageFile.value = '';
+    Alwazir.toast('Preview image URL applied — click Save Changes to apply');
   });
 
   /* ---------- security ---------- */

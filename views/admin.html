@@ -111,6 +111,31 @@
                 <span class="hint">Paste a logo link to use it instead of uploading.</span>
               </div>
               <div class="field full">
+                <label>Link preview (when the site is shared)</label>
+                <span class="hint">This is the image and title people see when you share the website link on WhatsApp or social media.</span>
+              </div>
+              <div class="field">
+                <label for="share-title">Preview title</label>
+                <input type="text" id="share-title" name="shareTitle" placeholder="alwazir — Luxury Perfume Oils">
+              </div>
+              <div class="field">
+                <label for="share-desc">Preview description</label>
+                <input type="text" id="share-desc" name="shareDescription" placeholder="Explore our oud, musk, amber and floral perfume oils.">
+              </div>
+              <div class="field">
+                <label>Preview image</label>
+                <div class="image-drop" data-share-image-drop>
+                  Click to upload a preview image (PNG/JPG)
+                  <input type="file" accept="image/*" data-share-image-file hidden>
+                </div>
+                <img class="image-preview" data-share-image-preview alt="share preview image">
+              </div>
+              <div class="field">
+                <label for="share-image-url">Preview image URL</label>
+                <input type="text" id="share-image-url" name="shareImageUrl" placeholder="https://example.com/preview.jpg" data-share-image-url>
+                <span class="hint">Leave blank to use the brand logo.</span>
+              </div>
+              <div class="field full">
                 <label>Theme</label>
                 <div class="theme-grid" data-theme-grid>
                   <div class="theme-card theme-gold" data-theme="gold"><div class="theme-swatches"><span class="swatch sw1"></span><span class="swatch sw2"></span></div>Gold &amp; White</div>
