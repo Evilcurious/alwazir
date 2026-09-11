@@ -73,7 +73,10 @@ https://YOUR-SITE.vercel.app/api/status
 - `{"mode":"blob","blobConnected":true,"storeAccess":"public"}` → ✅ connected to a public store
 - `{"mode":"blob","blobConnected":true,"storeAccess":"private"}` → ✅ connected to a private store
 - `{"mode":"blob","blobConnected":false,...}` → token set but Blob unreachable (wrong token / not linked)
-- `{"mode":"local","blobConnected":false,...}` → no `BLOB_READ_WRITE_TOKEN` set yet
+- `{"mode":"local","blobConnected":false,"persistable":true}` → saving to a local file (normal server)
+- `{"mode":"local","blobConnected":false,"persistable":false}` → ❌ read-only (e.g. Vercel without Blob) — changes won't save
+
+The admin panel also shows this status as a colored banner at the top of the dashboard.
 
 ### ⚠️ Note about public stores
 

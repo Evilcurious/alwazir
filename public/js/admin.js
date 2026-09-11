@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loginScreen.classList.add('hidden');
     dashboard.classList.remove('hidden');
     renderAll();
+    renderStorageStatus();
   }
 
   loginForm.addEventListener('submit', async (e) => {
@@ -225,6 +226,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const urlInput = document.querySelector('[data-logo-url]');
     if (urlInput) urlInput.value = settings.logo || '';
+  }
+
+  /* Show whether the current environment actually persists changes. */
+  async function renderStorageStatus() {
+    const banner = document.querySelector('[data-storage-banner]');
+    if (!banner) return;
+    let status;
+    try {
+      const res = await fetch('/api/status');
+      status = await res.json();
+    } catch (e) {
+      banner.className = 'storage-banner storage-warn';
+      banner.textContent = '⚠️ Could not check storage status.';
+      return;
+    }
+    if (status.mode === 'blob' && status.blobConnected) {
+      banner.className = 'storage-banner storage-ok';
+      banner.textContent = `✅ Saving to the database (Vercel Blob${status.storeAccess ? ', ' + status.storeAccess : ''}) — your changes persist.`;
+    } else if (status.mode === 'blob') {
+      banner.className = 'storage-banner storage-bad';
+      banner.textContent = '❌ Database is NOT connected — changes will NOT be saved. Connect your Vercel Blob store and redeploy.';
+    } else if (status.persistable) {
+      banner.className = 'storage-banner storage-ok';
+      banner.textContent = '💾 Saving locally (file). Works on this server — connect Vercel Blob to persist in production.';
+    } else {
+      banner.className = 'storage-banner storage-bad';
+      banner.textContent = '❌ Storage is read-only — changes will NOT be saved. Connect a Vercel Blob store or run locally (npm start).';
+    }
   }
 
   /* ---------- product CRUD ---------- */
