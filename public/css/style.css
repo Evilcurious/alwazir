@@ -93,6 +93,44 @@ body[data-theme='midnight'] {
   --danger: #e06572;
 }
 
+body[data-theme='dark'] {
+  --bg: #0a0e0b;
+  --bg-soft: #10160f;
+  --card: #121913;
+  --text: #eef5ec;
+  --muted: #93a18e;
+  --accent: #25d366;
+  --accent-strong: #4ade80;
+  --accent-soft: #12301d;
+  --accent-ghost: rgba(37, 211, 102, 0.12);
+  --border: #223024;
+  --gold-gradient: linear-gradient(135deg, #7dffb0 0%, #25d366 50%, #148a43 100%);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --on-accent: #04210f;
+  --header-bg: rgba(10, 14, 11, 0.9);
+  --input-bg: #121913;
+  --danger: #ff7a85;
+}
+
+/* ---------- text style: selectable fonts ---------- */
+body[data-font='poppins'] { --font-body: 'Poppins', 'Inter', sans-serif; }
+body[data-font='lora'] { --font-body: 'Lora', Georgia, serif; }
+body[data-font='montserrat'] { --font-body: 'Montserrat', 'Inter', sans-serif; }
+body[data-font='opensans'] { --font-body: 'Open Sans', 'Inter', sans-serif; }
+body[data-font='nunito'] { --font-body: 'Nunito', 'Inter', sans-serif; }
+body[data-font='raleway'] { --font-body: 'Raleway', 'Inter', sans-serif; }
+
+/* ---------- text style: bold ---------- */
+body[data-bold='true'] { font-weight: 700; }
+body[data-bold='true'] .section-sub,
+body[data-bold='true'] .hero-tagline,
+body[data-bold='true'] .product-desc,
+body[data-bold='true'] .special-desc,
+body[data-bold='true'] .details-desc,
+body[data-bold='true'] .field .hint,
+body[data-bold='true'] .empty-state { font-weight: 600; }
+
 /* ---------- reset / base ---------- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1212,6 +1250,21 @@ input, textarea, select {
 .theme-royal .sw1 { background: #e4eaf6; }
 .theme-royal .sw2 { background: #274c8f; }
 
+.theme-dark .sw1 { background: #0a0e0b; }
+.theme-dark .sw2 { background: #25d366; }
+
+/* font picker cards (admin) */
+.font-card { font-size: 0.9rem; }
+.font-card .font-sample {
+  display: block;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.font-card.selected { color: var(--accent-strong); }
+.font-card.selected .font-sample { color: var(--accent-strong); }
+
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
   .grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
@@ -1363,6 +1416,10 @@ input, textarea, select {
   .modal { padding: 20px 16px; }
   .modal-head h3 { font-size: 1.3rem; }
   .theme-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .font-card .font-sample { font-size: 1.4rem; }
+  .font-card { font-size: 0.8rem; padding: 12px 10px; }
+  .mode-grid { gap: 10px; }
+  .mode-card { padding: 14px 10px; font-size: 0.85rem; }
   .toast { bottom: 16px; }
 }
 

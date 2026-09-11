@@ -124,6 +124,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderBrandForm();
     renderThemePicker();
     renderMobileToggle();
+    renderFontPicker();
+    renderBoldToggle();
     renderLogoPreview();
   }
 
@@ -166,15 +168,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function renderThemePicker() {
-    document.querySelectorAll('.theme-card').forEach((card) => {
+    document.querySelectorAll('[data-theme-grid] .theme-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.theme === settings.theme);
     });
   }
 
   function renderMobileToggle() {
     const mode = settings.mobileColumns === 'single' ? 'single' : 'double';
-    document.querySelectorAll('.mode-card').forEach((card) => {
+    document.querySelectorAll('[data-mobile-toggle] .mode-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.mode === mode);
+    });
+  }
+
+  function renderFontPicker() {
+    const font = settings.fontFamily || 'default';
+    document.querySelectorAll('.font-card').forEach((card) => {
+      card.classList.toggle('selected', card.dataset.font === font);
+    });
+  }
+
+  function renderBoldToggle() {
+    const bold = settings.textBold ? 'true' : 'false';
+    document.querySelectorAll('[data-bold-toggle] .mode-card').forEach((card) => {
+      card.classList.toggle('selected', card.dataset.bold === bold);
     });
   }
 
@@ -353,7 +369,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       currency: field(form, 'currency').value,
       whatsapp: field(form, 'whatsapp').value,
       theme: document.querySelector('.theme-card.selected')?.dataset.theme || 'gold',
-      mobileColumns: document.querySelector('.mode-card.selected')?.dataset.mode || 'double'
+      mobileColumns: document.querySelector('[data-mobile-toggle] .mode-card.selected')?.dataset.mode || 'double',
+      fontFamily: document.querySelector('.font-card.selected')?.dataset.font || 'default',
+      textBold: document.querySelector('[data-bold-toggle] .mode-card.selected')?.dataset.bold === 'true'
     };
     if (pendingLogoUrl) payload.logo = pendingLogoUrl;
     try {
@@ -371,9 +389,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       pendingLogoUrl = null;
       Alwazir.toast('Settings saved');
       renderAll();
-      Alwazir.applySettings();
-      // refresh public settings cache
-      await Alwazir.boot();
+      // refresh the storefront theme/font/bold cache and re-apply
+      await Alwazir.refreshSettings();
     } catch (err) {
       Alwazir.toast('Could not save settings');
     }
@@ -382,7 +399,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelector('[data-theme-grid]').addEventListener('click', (e) => {
     const card = e.target.closest('.theme-card');
     if (!card) return;
-    document.querySelectorAll('.theme-card').forEach((c) => c.classList.remove('selected'));
+    document.querySelectorAll('[data-theme-grid] .theme-card').forEach((c) => c.classList.remove('selected'));
     card.classList.add('selected');
     // live preview the theme on the admin page
     document.body.setAttribute('data-theme', card.dataset.theme);
@@ -391,8 +408,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelector('[data-mobile-toggle]').addEventListener('click', (e) => {
     const card = e.target.closest('.mode-card');
     if (!card) return;
-    document.querySelectorAll('.mode-card').forEach((c) => c.classList.remove('selected'));
+    document.querySelectorAll('[data-mobile-toggle] .mode-card').forEach((c) => c.classList.remove('selected'));
     card.classList.add('selected');
+  });
+
+  document.querySelector('[data-font-grid]').addEventListener('click', (e) => {
+    const card = e.target.closest('.font-card');
+    if (!card) return;
+    document.querySelectorAll('.font-card').forEach((c) => c.classList.remove('selected'));
+    card.classList.add('selected');
+    // live preview the font on the admin page
+    const font = card.dataset.font;
+    if (font && font !== 'default') document.body.setAttribute('data-font', font);
+    else document.body.removeAttribute('data-font');
+  });
+
+  document.querySelector('[data-bold-toggle]').addEventListener('click', (e) => {
+    const card = e.target.closest('.mode-card');
+    if (!card) return;
+    document.querySelectorAll('[data-bold-toggle] .mode-card').forEach((c) => c.classList.remove('selected'));
+    card.classList.add('selected');
+    // live preview the weight on the admin page
+    document.body.setAttribute('data-bold', card.dataset.bold === 'true' ? 'true' : 'false');
   });
 
   const logoDrop = document.querySelector('[data-logo-drop]');
