@@ -1142,6 +1142,35 @@ input, textarea, select {
   background: var(--bg-soft);
 }
 
+/* mobile product view toggle (admin) */
+.mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.mode-card {
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 14px;
+  cursor: pointer;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  transition: all 0.15s ease;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.mode-card:hover { border-color: var(--accent); }
+
+.mode-card.selected {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+  background: var(--accent-ghost);
+}
+
+.mode-icon { display: block; font-size: 1.3rem; margin-bottom: 4px; }
+
+.mode-sub { font-weight: 500; font-size: 0.78rem; color: var(--muted); }
+
 /* theme picker */
 .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 
@@ -1193,6 +1222,10 @@ input, textarea, select {
   .product-foot { flex-direction: column; align-items: stretch; gap: 12px; }
   .product-actions { width: 100%; }
   .product-actions .btn { flex: 1; }
+
+  /* single mode: one full-width product per row */
+  body[data-mobile-columns='single'] .grid { grid-template-columns: 1fr; gap: 26px; }
+  body[data-mobile-columns='single'] .product-media { min-height: 320px; }
 
   .details-layout { grid-template-columns: 1fr; gap: 32px; }
   .details-media { position: static; }
@@ -1252,6 +1285,16 @@ input, textarea, select {
   .product-price { font-size: 1.05rem; }
   .product-actions { width: 100%; flex-direction: column; gap: 8px; }
   .product-actions .btn { padding: 10px 8px; font-size: 0.8rem; }
+
+  /* single mode on phones: one large product per row */
+  body[data-mobile-columns='single'] .grid { grid-template-columns: 1fr; gap: 22px; }
+  body[data-mobile-columns='single'] .product-media { aspect-ratio: auto; min-height: 260px; }
+  body[data-mobile-columns='single'] .product-category { font-size: 0.68rem; letter-spacing: 0.18em; }
+  body[data-mobile-columns='single'] .product-name { font-size: 1.35rem; }
+  body[data-mobile-columns='single'] .product-desc { font-size: 0.88rem; }
+  body[data-mobile-columns='single'] .product-price { font-size: 1.25rem; }
+  body[data-mobile-columns='single'] .product-actions { flex-direction: row; gap: 10px; }
+  body[data-mobile-columns='single'] .product-actions .btn { padding: 12px 14px; font-size: 0.85rem; }
 
   /* ---------- special offer ---------- */
   .special-section { padding: 40px 0 0; }

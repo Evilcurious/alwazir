@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderProducts();
     renderBrandForm();
     renderThemePicker();
+    renderMobileToggle();
     renderLogoPreview();
   }
 
@@ -167,6 +168,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderThemePicker() {
     document.querySelectorAll('.theme-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.theme === settings.theme);
+    });
+  }
+
+  function renderMobileToggle() {
+    const mode = settings.mobileColumns === 'single' ? 'single' : 'double';
+    document.querySelectorAll('.mode-card').forEach((card) => {
+      card.classList.toggle('selected', card.dataset.mode === mode);
     });
   }
 
@@ -344,7 +352,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       tagline: field(form, 'tagline').value,
       currency: field(form, 'currency').value,
       whatsapp: field(form, 'whatsapp').value,
-      theme: document.querySelector('.theme-card.selected')?.dataset.theme || 'gold'
+      theme: document.querySelector('.theme-card.selected')?.dataset.theme || 'gold',
+      mobileColumns: document.querySelector('.mode-card.selected')?.dataset.mode || 'double'
     };
     if (pendingLogoUrl) payload.logo = pendingLogoUrl;
     try {
@@ -377,6 +386,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     card.classList.add('selected');
     // live preview the theme on the admin page
     document.body.setAttribute('data-theme', card.dataset.theme);
+  });
+
+  document.querySelector('[data-mobile-toggle]').addEventListener('click', (e) => {
+    const card = e.target.closest('.mode-card');
+    if (!card) return;
+    document.querySelectorAll('.mode-card').forEach((c) => c.classList.remove('selected'));
+    card.classList.add('selected');
   });
 
   const logoDrop = document.querySelector('[data-logo-drop]');
