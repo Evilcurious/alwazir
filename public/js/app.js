@@ -27,7 +27,6 @@ const Alwazir = (() => {
     lines.push('');
     lines.push(`1. ${product.name}`);
     lines.push(`💰 Price: ${formatMoney(product.price)}`);
-    if (product.description) lines.push(`📝 ${product.description}`);
     lines.push('');
     lines.push(`💳 *Total: ${formatMoney(product.price)}*`);
     openWhatsApp(lines.join('\n'));

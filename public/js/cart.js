@@ -1,7 +1,7 @@
 /* ============================================================
    ALWAZIR — cart drawer (home + product pages)
    The cart has a "Chat & Order on WhatsApp" button that sends
-   every item (name, description, price, quantity) to the store's
+   every item (name, price, quantity) to the store's
    WhatsApp number.
    ============================================================ */
 
@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
       lines.push('');
       lines.push(`${i + 1}. ${it.name}`);
       lines.push(`💰 Price: ${Alwazir.formatMoney(it.price)}  × ${it.qty}`);
-      if (it.description) lines.push(`📝 ${it.description}`);
     });
 
     lines.push('');
