@@ -84,6 +84,11 @@ const Alwazir = (() => {
     document.querySelectorAll('[data-tagline]').forEach((el) => {
       el.textContent = settings.tagline || '';
     });
+    // Favicon (browser tab icon) follows the brand logo.
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon && settings.logo) {
+      favicon.href = settings.logo;
+    }
     const title = document.querySelector('title');
     if (title && !title.dataset.keep) {
       const page = title.dataset.page ? `${title.dataset.page} — ` : '';
