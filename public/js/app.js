@@ -19,17 +19,110 @@ const Alwazir = (() => {
     window.open(url, '_blank', 'noopener');
   }
 
-  function chatAboutProduct(product) {
+  function chatAboutProduct(product, variant) {
     if (!product) return;
     const brand = settings.brandName || 'alwazir';
+    const price = variant ? variant.price : product.price;
     const lines = [];
     lines.push(`🛍️ *New Order — ${brand}*`);
     lines.push('');
-    lines.push(`1. ${product.name}`);
-    lines.push(`💰 Price: ${formatMoney(product.price)}`);
+    lines.push(`1. ${product.name}${variant ? ` — ${mlLabel(variant.ml)}` : ''}`);
+    lines.push(`💰 Price: ${formatMoney(price)}`);
     lines.push('');
-    lines.push(`💳 *Total: ${formatMoney(product.price)}*`);
+    lines.push(`💳 *Total: ${formatMoney(price)}*`);
     openWhatsApp(lines.join('\n'));
+  }
+
+  /* ---------- sizes (ml) ---------- */
+  function mlLabel(ml) {
+    const n = Number(ml);
+    return Number.isFinite(n) ? `${n}ml` : '';
+  }
+
+  /* Sizes of a product, smallest first. Empty array = single-size product. */
+  function variantList(product) {
+    const list = product && Array.isArray(product.variants) ? product.variants : [];
+    return list
+      .map((v) => ({ ml: Number(v && v.ml), price: Number(v && v.price) }))
+      .filter((v) => Number.isFinite(v.ml) && v.ml > 0 && Number.isFinite(v.price) && v.price >= 0)
+      .sort((a, b) => a.ml - b.ml);
+  }
+
+  /* The size a product starts on (the smallest one — that price is the base price). */
+  function defaultVariant(product) {
+    const list = variantList(product);
+    return list.length ? list[0] : null;
+  }
+
+  /* Size button + dropdown: shows "100ml ⌄" and reveals 200ml / 300ml … */
+  function sizeSelectHtml(product) {
+    const list = variantList(product);
+    if (!list.length) return '';
+    const active = list[0];
+    const caret =
+      '<svg class="size-caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+    const options = list
+      .map(
+        (v) => `
+            <button type="button" class="size-opt${v.ml === active.ml ? ' is-active' : ''}" role="option" aria-selected="${v.ml === active.ml}" data-size-opt data-ml="${v.ml}" data-price="${v.price}">
+              <span class="size-opt-ml">${mlLabel(v.ml)}</span>
+              <span class="size-opt-price">${formatMoney(v.price)}</span>
+            </button>`
+      )
+      .join('');
+    return `
+          <div class="size-select" data-size-select data-ml="${active.ml}" data-price="${active.price}">
+            <button type="button" class="size-btn" data-size-toggle aria-haspopup="listbox" aria-expanded="false" title="Choose a size">
+              <span class="size-label" data-size-label>${mlLabel(active.ml)}</span>
+              ${caret}
+            </button>
+            <div class="size-menu" data-size-menu role="listbox" aria-label="Available sizes">${options}
+            </div>
+          </div>`;
+  }
+
+  /* Which container the size picker + price of a card live in. */
+  function scopeOf(el) {
+    if (!el || !el.closest) return document;
+    return el.closest('.product-card, .mini-card, .special-card, .details-info') || el.closest('[data-id]') || document;
+  }
+
+  /* The size currently picked inside a card (falls back to the smallest one). */
+  function selectedVariant(scope, product) {
+    const list = variantList(product);
+    if (!list.length) return null;
+    const sel = scope && scope.querySelector ? scope.querySelector('[data-size-select]') : null;
+    const ml = sel ? Number(sel.dataset.ml) : list[0].ml;
+    return list.find((v) => v.ml === ml) || list[0];
+  }
+
+  function closeSizeMenus(except) {
+    document.querySelectorAll('[data-size-select].open').forEach((sel) => {
+      if (except && sel === except) return;
+      sel.classList.remove('open');
+      const btn = sel.querySelector('[data-size-toggle]');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function chooseSize(opt) {
+    const sel = opt.closest('[data-size-select]');
+    if (!sel) return;
+    const ml = Number(opt.dataset.ml);
+    const price = Number(opt.dataset.price);
+    sel.dataset.ml = String(ml);
+    sel.dataset.price = String(price);
+    const label = sel.querySelector('[data-size-label]');
+    if (label) label.textContent = mlLabel(ml);
+    sel.querySelectorAll('[data-size-opt]').forEach((o) => {
+      const on = Number(o.dataset.ml) === ml;
+      o.classList.toggle('is-active', on);
+      o.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    // keep the visible price in sync with the chosen size
+    const priceEl = scopeOf(sel).querySelector('[data-price-display]');
+    if (priceEl) priceEl.textContent = formatMoney(price);
+    closeSizeMenus();
   }
 
   /* ---------- currency formatting ---------- */
@@ -113,11 +206,33 @@ const Alwazir = (() => {
   /* ---------- cart ---------- */
   const CART_KEY = 'alwazir-cart';
 
+  /* A cart line is unique per product + chosen size, so 100ml and 200ml of the
+     same oil are two separate lines. */
+  function itemKey(id, variant) {
+    return variant ? `${id}::${variant.ml}` : String(id);
+  }
+
+  function normalizeItem(it) {
+    if (!it || !it.id) return null;
+    const ml = Number(it.ml) > 0 ? Number(it.ml) : null;
+    const qty = Number(it.qty) > 0 ? Number(it.qty) : 1;
+    return {
+      key: it.key || (ml ? `${it.id}::${ml}` : String(it.id)),
+      id: String(it.id),
+      name: it.name || '',
+      ml,
+      price: Number(it.price) || 0,
+      image: it.image || '',
+      description: it.description || '',
+      qty
+    };
+  }
+
   function loadCart() {
     try {
       const raw = localStorage.getItem(CART_KEY);
       const items = raw ? JSON.parse(raw) : [];
-      return Array.isArray(items) ? items : [];
+      return (Array.isArray(items) ? items : []).map(normalizeItem).filter(Boolean);
     } catch (e) {
       return [];
     }
@@ -136,42 +251,47 @@ const Alwazir = (() => {
     return loadCart().reduce((sum, it) => sum + it.price * it.qty, 0);
   }
 
-  function addToCart(product, qty = 1) {
+  function addToCart(product, qty = 1, variant = null) {
     const items = loadCart();
-    const existing = items.find((it) => it.id === product.id);
+    const key = itemKey(product.id, variant);
+    const price = variant ? variant.price : Number(product.price) || 0;
+    const existing = items.find((it) => it.key === key);
     if (existing) {
       existing.qty += qty;
+      existing.price = price;
       // keep the freshest description / image available
       if (product.description) existing.description = product.description;
       if (product.image) existing.image = product.image;
     } else {
       items.push({
+        key,
         id: product.id,
         name: product.name,
-        price: product.price,
+        ml: variant ? variant.ml : null,
+        price,
         image: product.image,
         description: product.description || '',
         qty
       });
     }
     saveCart(items);
-    toast(`Added "${product.name}" to cart`);
+    toast(`Added "${product.name}${variant ? ` ${mlLabel(variant.ml)}` : ''}" to cart`);
   }
 
-  function updateQty(id, qty) {
+  function updateQty(key, qty) {
     let items = loadCart();
-    const item = items.find((it) => it.id === id);
+    const item = items.find((it) => it.key === key);
     if (!item) return;
     if (qty <= 0) {
-      items = items.filter((it) => it.id !== id);
+      items = items.filter((it) => it.key !== key);
     } else {
       item.qty = qty;
     }
     saveCart(items);
   }
 
-  function removeFromCart(id) {
-    saveCart(loadCart().filter((it) => it.id !== id));
+  function removeFromCart(key) {
+    saveCart(loadCart().filter((it) => it.key !== key));
   }
 
   function clearCart() {
@@ -202,6 +322,7 @@ const Alwazir = (() => {
   }
 
   function productCardHtml(p) {
+    const sizes = sizeSelectHtml(p);
     return `
       <article class="product-card" data-id="${p.id}">
         <a class="product-media" href="/product.html?id=${encodeURIComponent(p.id)}" aria-label="View ${escapeHtml(p.name)} details">
@@ -212,8 +333,9 @@ const Alwazir = (() => {
           <div class="product-category">${escapeHtml(p.category || 'General')}</div>
           <h3 class="product-name">${escapeHtml(p.name)}</h3>
           <p class="product-desc">${escapeHtml(p.description || '')}</p>
+          ${sizes ? `<div class="size-row">${sizes}</div>` : ''}
           <div class="product-foot">
-            <div class="product-price">${formatMoney(p.price)}</div>
+            <div class="product-price" data-price-display>${formatMoney(p.price)}</div>
             <div class="product-actions">
               <button class="btn btn-whatsapp" data-action="chat" data-id="${p.id}">${WHATSAPP_ICON} Chat</button>
               <button class="btn btn-gold" data-action="add" data-id="${p.id}">Add to Cart</button>
@@ -224,6 +346,7 @@ const Alwazir = (() => {
   }
 
   function miniCardHtml(p) {
+    const sizes = sizeSelectHtml(p);
     return `
       <article class="mini-card" data-id="${p.id}">
         <a class="mini-media" href="/product.html?id=${encodeURIComponent(p.id)}" aria-label="${escapeHtml(p.name)}">
@@ -234,7 +357,8 @@ const Alwazir = (() => {
           <div class="product-category">${escapeHtml(p.category || 'General')}</div>
           <h4 class="product-name">${escapeHtml(p.name)}</h4>
           <p class="product-desc">${escapeHtml(p.description || '')}</p>
-          <div class="product-price">${formatMoney(p.price)}</div>
+          ${sizes ? `<div class="size-row">${sizes}</div>` : ''}
+          <div class="product-price" data-price-display>${formatMoney(p.price)}</div>
           <button class="btn btn-gold" data-action="add" data-id="${p.id}">Add to Cart</button>
         </div>
       </article>`;
@@ -252,22 +376,43 @@ const Alwazir = (() => {
   /* ---------- delegated actions ---------- */
   function wireActions(root = document) {
     root.addEventListener('click', (e) => {
+      const sizeToggle = e.target.closest('[data-size-toggle]');
+      const sizeOpt = e.target.closest('[data-size-opt]');
       const addBtn = e.target.closest('[data-action="add"]');
       const chatBtn = e.target.closest('[data-action="chat"]');
       const detailsBtn = e.target.closest('[data-action="details"]');
 
+      if (sizeToggle) {
+        e.preventDefault();
+        const sel = sizeToggle.closest('[data-size-select]');
+        const willOpen = !sel.classList.contains('open');
+        closeSizeMenus(sel);
+        sel.classList.toggle('open', willOpen);
+        sizeToggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        return;
+      }
+
+      if (sizeOpt) {
+        e.preventDefault();
+        chooseSize(sizeOpt);
+        return;
+      }
+
       if (addBtn) {
         e.preventDefault();
         const card = addBtn.closest('[data-id]');
-        const product = window.__products && window.__products[card && card.dataset.id];
+        const id = (card && card.dataset.id) || addBtn.dataset.id;
+        const product = window.__products && window.__products[id];
+        const scope = scopeOf(addBtn);
         if (product) {
-          addToCart(product);
+          addToCart(product, 1, selectedVariant(scope, product));
           return;
         }
         // fallback: fetch by id
-        fetch(`/api/products/${card.dataset.id}`)
+        fetch(`/api/products/${encodeURIComponent(id)}`)
           .then((r) => r.json())
-          .then((p) => addToCart(p));
+          .then((p) => addToCart(p, 1, selectedVariant(scope, p)))
+          .catch(() => toast('Could not load product'));
         return;
       }
 
@@ -276,14 +421,15 @@ const Alwazir = (() => {
         const card = chatBtn.closest('[data-id]');
         const id = (card && card.dataset.id) || chatBtn.dataset.id;
         const product = window.__products && window.__products[id];
+        const scope = scopeOf(chatBtn);
         if (product) {
-          chatAboutProduct(product);
+          chatAboutProduct(product, selectedVariant(scope, product));
           return;
         }
         // fallback: fetch by id
         fetch(`/api/products/${encodeURIComponent(id)}`)
           .then((r) => r.json())
-          .then((p) => chatAboutProduct(p))
+          .then((p) => chatAboutProduct(p, selectedVariant(scope, p)))
           .catch(() => toast('Could not load product'));
         return;
       }
@@ -293,6 +439,14 @@ const Alwazir = (() => {
         const card = detailsBtn.closest('[data-id]');
         window.location.href = `/product.html?id=${encodeURIComponent(card.dataset.id)}`;
       }
+    });
+
+    // Close an open size menu when clicking anywhere else or pressing Escape.
+    root.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-size-select]')) closeSizeMenus();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeSizeMenus();
     });
   }
 
@@ -332,6 +486,11 @@ const Alwazir = (() => {
     miniCardHtml,
     mediaHtml,
     badgeHtml,
+    mlLabel,
+    variantList,
+    defaultVariant,
+    sizeSelectHtml,
+    selectedVariant,
     escapeHtml,
     toast,
     applySettings

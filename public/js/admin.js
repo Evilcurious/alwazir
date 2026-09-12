@@ -132,6 +132,48 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  /* ---------- size (ml) editor ---------- */
+  const variantRows = document.querySelector('[data-variant-rows]');
+
+  function variantRowHtml(variant = {}) {
+    const ml = Number.isFinite(Number(variant.ml)) && variant.ml !== null && variant.ml !== '' ? variant.ml : '';
+    const price = Number.isFinite(Number(variant.price)) && variant.price !== null && variant.price !== '' ? variant.price : '';
+    return `
+      <div class="variant-row" data-variant-row>
+        <input type="number" min="1" step="1" inputmode="numeric" data-variant-ml placeholder="100" aria-label="Size in ml" value="${ml}">
+        <span class="variant-unit">ml</span>
+        <input type="number" min="0" step="0.01" inputmode="decimal" data-variant-price placeholder="Price" aria-label="Price for this size" value="${price}">
+        <button type="button" class="icon-btn delete" data-variant-remove title="Remove this size">&#128465;</button>
+      </div>`;
+  }
+
+  function renderVariantRows(variants) {
+    const list = Array.isArray(variants) ? variants : [];
+    variantRows.innerHTML = list.map((v) => variantRowHtml(v)).join('');
+  }
+
+  /* Reads the editor rows into [{ ml, price }] — fully filled rows only. */
+  function readVariantRows() {
+    return [...variantRows.querySelectorAll('[data-variant-row]')]
+      .map((row) => ({
+        ml: Number(row.querySelector('[data-variant-ml]').value),
+        price: Number(row.querySelector('[data-variant-price]').value)
+      }))
+      .filter((v) => Number.isFinite(v.ml) && v.ml > 0 && Number.isFinite(v.price) && v.price >= 0);
+  }
+
+  document.querySelector('[data-variant-add]').addEventListener('click', () => {
+    variantRows.insertAdjacentHTML('beforeend', variantRowHtml());
+    const row = variantRows.lastElementChild;
+    if (row) row.querySelector('[data-variant-ml]').focus();
+  });
+
+  variantRows.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-variant-remove]')) return;
+    const row = e.target.closest('[data-variant-row]');
+    if (row) row.remove();
+  });
+
   /* ---------- render ---------- */
   function renderAll() {
     renderProducts();
@@ -142,6 +184,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderBrandFontPicker();
     renderBoldToggle();
     renderLogoPreview();
+  }
+
+  /* Size summary shown in the product list, e.g. "· 100ml $180 / 200ml $320" */
+  function sizesMeta(p) {
+    const list = Alwazir.variantList(p);
+    if (!list.length) return '';
+    return ` &middot; ${list.map((v) => `${Alwazir.mlLabel(v.ml)} ${Alwazir.formatMoney(v.price)}`).join(' / ')}`;
   }
 
   function renderProducts() {
@@ -161,7 +210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         <div class="admin-product-main">
           <div class="name">${Alwazir.escapeHtml(p.name)}</div>
-          <div class="meta">${Alwazir.escapeHtml(p.category || 'General')} &middot; ${Alwazir.formatMoney(p.price)}</div>
+          <div class="meta">${Alwazir.escapeHtml(p.category || 'General')} &middot; ${Alwazir.formatMoney(p.price)}${sizesMeta(p)}</div>
         </div>
         <button class="toggle-chip ${p.popular ? 'on' : ''}" data-toggle="popular" title="Toggle popular pin">&#9733; Popular</button>
         <button class="toggle-chip ${p.special ? 'special-on' : ''}" data-toggle="special" title="Toggle special offer">&#10024; Special</button>
@@ -263,6 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     field(form, 'name').value = product ? product.name : '';
     field(form, 'category').value = product ? (product.category || '') : '';
     field(form, 'price').value = product ? product.price : '';
+    renderVariantRows(product ? product.variants : []);
     field(form, 'description').value = product ? (product.description || '') : '';
     field(form, 'popular').checked = product ? !!product.popular : false;
     field(form, 'special').checked = product ? !!product.special : false;
@@ -343,10 +393,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelector('[data-product-form]').addEventListener('submit', async (e) => {
     e.preventDefault();
     const form = e.target;
+    const variants = readVariantRows();
+    const priceValue = field(form, 'price').value;
+    if (!variants.length && (priceValue === '' || Number(priceValue) < 0)) {
+      Alwazir.toast('Enter a price, or add at least one size (ml) with its price');
+      return;
+    }
     const payload = {
       name: field(form, 'name').value,
       category: field(form, 'category').value,
-      price: field(form, 'price').value,
+      price: priceValue,
+      variants,
       description: field(form, 'description').value,
       popular: field(form, 'popular').checked,
       special: field(form, 'special').checked,
@@ -385,6 +442,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         name: product.name,
         category: product.category,
         price: product.price,
+        variants: product.variants || [],
         description: product.description,
         image: product.image,
         popular: product.popular,

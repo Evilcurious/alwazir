@@ -576,7 +576,8 @@ input, textarea, select {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  /* visible (not hidden) so the size (ml) dropdown can open outside the card */
+  overflow: visible;
   box-shadow: var(--shadow-sm);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -595,6 +596,7 @@ input, textarea, select {
   justify-content: center;
   min-height: 46vh;
   overflow: hidden;
+  border-radius: var(--radius) var(--radius) 0 0; /* clips the image corners */
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -696,6 +698,80 @@ input, textarea, select {
 
 .product-actions { display: flex; gap: 10px; }
 
+/* ---------- size (ml) picker ---------- */
+.size-row { display: flex; align-items: center; margin-top: 2px; }
+.special-sizes, .details-sizes { display: flex; align-items: center; }
+.special-sizes:empty, .details-sizes:empty { display: none; }
+
+.size-select { position: relative; display: inline-block; }
+
+.size-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  color: var(--text);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.size-btn:hover,
+.size-select.open .size-btn {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  background: var(--accent-ghost);
+}
+
+.size-caret { transition: transform 0.18s ease; flex-shrink: 0; }
+.size-select.open .size-caret { transform: rotate(180deg); }
+
+.size-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  min-width: 100%;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.size-select.open .size-menu { display: flex; }
+
+.size-opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  text-align: left;
+}
+
+.size-opt:hover { background: var(--accent-ghost); }
+.size-opt.is-active { background: var(--accent-ghost); color: var(--accent-strong); font-weight: 800; }
+.size-opt-price { color: var(--muted); font-weight: 600; }
+.size-opt.is-active .size-opt-price { color: var(--accent-strong); }
+
 .empty-state {
   text-align: center;
   padding: 80px 20px;
@@ -774,9 +850,23 @@ input, textarea, select {
   white-space: pre-line;
 }
 
-.details-actions { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+.details-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 
 .details-actions .btn { padding: 15px 32px; font-size: 1rem; }
+
+.details-sizes .size-btn { padding: 11px 18px; font-size: 0.92rem; }
+
+.details-back {
+  align-self: flex-start;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.details-back:hover { color: var(--accent); border-bottom-color: var(--accent); }
 
 .similar-section { margin-top: 90px; }
 
@@ -790,7 +880,8 @@ input, textarea, select {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  overflow: hidden;
+  /* visible so the size (ml) dropdown isn't clipped */
+  overflow: visible;
   box-shadow: var(--shadow-sm);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
@@ -799,7 +890,13 @@ input, textarea, select {
 
 .mini-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
 
-.mini-media { background: var(--bg-soft); aspect-ratio: 1; overflow: hidden; position: relative; }
+.mini-media {
+  background: var(--bg-soft);
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
 
 .mini-media img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -886,6 +983,19 @@ input, textarea, select {
 .cart-item-info { flex: 1; min-width: 0; }
 
 .cart-item-name { font-weight: 600; font-size: 0.95rem; }
+
+.cart-item-size {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-ghost);
+  color: var(--accent-strong);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
 
 .cart-item-price { color: var(--accent-strong); font-weight: 700; font-size: 0.9rem; }
 
@@ -1134,7 +1244,37 @@ input, textarea, select {
 .admin-product-main { flex: 1; min-width: 0; }
 
 .admin-product-main .name { font-weight: 700; }
-.admin-product-main .meta { color: var(--muted); font-size: 0.82rem; }
+.admin-product-main .meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* size (ml) editor inside the product modal */
+.variant-editor { display: flex; flex-direction: column; gap: 10px; }
+
+.variant-row { display: flex; align-items: center; gap: 8px; }
+
+.variant-row input[type='number'] {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.variant-row input[type='number']:focus { border-color: var(--accent); outline: none; }
+
+.variant-unit { color: var(--muted); font-weight: 700; font-size: 0.85rem; }
+
+.variant-add { align-self: flex-start; padding: 9px 16px; font-size: 0.85rem; }
 
 .toggle-chip {
   border: 1px solid var(--border);
@@ -1416,6 +1556,11 @@ input, textarea, select {
   .product-actions { width: 100%; flex-direction: column; gap: 8px; }
   .product-actions .btn { padding: 10px 8px; font-size: 0.8rem; }
 
+  /* size (ml) picker, scaled down for the 2-per-row phone layout */
+  .size-btn { padding: 7px 11px; font-size: 0.72rem; gap: 6px; }
+  .size-opt { padding: 8px 10px; font-size: 0.78rem; gap: 10px; }
+  .size-menu { min-width: 132px; }
+
   /* single mode on phones: one large product per row */
   html[data-mobile-columns='single'] .grid { grid-template-columns: 1fr; gap: 22px; }
   html[data-mobile-columns='single'] .product-media { aspect-ratio: auto; min-height: 260px; }
@@ -1444,6 +1589,11 @@ input, textarea, select {
   .details-desc { font-size: 0.95rem; line-height: 1.7; }
   .details-actions { gap: 10px; }
   .details-actions .btn { flex: 1; padding: 13px 14px; font-size: 0.9rem; }
+  .details-sizes .size-btn { padding: 11px 16px; font-size: 0.88rem; }
+
+  /* size editor rows stack so they stay tappable */
+  .variant-row { flex-wrap: wrap; }
+  .variant-row input[type='number'] { flex: 1 1 calc(50% - 40px); }
 
   .similar-section { margin-top: 56px; }
   .similar-grid { gap: 14px; }

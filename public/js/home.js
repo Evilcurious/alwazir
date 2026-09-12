@@ -92,6 +92,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       `<a class="special-media-link" href="${detailsUrl}" aria-label="View ${Alwazir.escapeHtml(special.name)} details">${Alwazir.mediaHtml(special)}</a>`;
     specialSection.querySelector('[data-special-name]').textContent = special.name;
     specialSection.querySelector('[data-special-desc]').textContent = special.description || '';
+    const sizesEl = specialSection.querySelector('[data-special-sizes]');
+    if (sizesEl) sizesEl.innerHTML = Alwazir.sizeSelectHtml(special);
     specialSection.querySelector('[data-special-price]').textContent = Alwazir.formatMoney(special.price);
     specialSection.querySelector('[data-special-add]').dataset.id = special.id;
     specialSection.querySelector('[data-special-chat]').dataset.id = special.id;

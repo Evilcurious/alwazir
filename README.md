@@ -129,6 +129,11 @@ So the exact same code runs locally and on Vercel with zero changes.
   for the **brand name**, and a **bold** toggle.
 - **Brand customization** — editable name, tagline, logo, WhatsApp number and
   currency symbol.
+- **Sizes (ml) & prices** — add any number of sizes to a product in the admin panel
+  (e.g. **100ml → 180**, **200ml → 300**, **300ml → 450**). The store then shows a size
+  button on the product card (`100ml ⌄`); tapping the arrow reveals the other sizes and
+  the price + cart line follow the size the customer picks. Products without sizes keep
+  a single plain price. See [Sizes (ml) & prices](#sizes-ml--prices) below.
 - **Product images** — upload an image file **or paste an image URL** (both work),
   directly from the admin panel.
 - **Link preview** — when the site link is shared (WhatsApp, Facebook, Twitter),
@@ -138,6 +143,38 @@ So the exact same code runs locally and on Vercel with zero changes.
   the **most-unused** image (not used by any product/logo/preview, oldest first)
   is deleted automatically.
 - **Cart** — add to cart, adjust quantities, and order via WhatsApp chat.
+
+## Sizes (ml) & prices
+
+Perfume oils are usually sold in several bottle sizes, each at its own price.
+
+**Adding sizes (admin panel → Products → Edit/Add product → "Sizes (ml) & prices")**
+
+1. Click **+ Add size**, type the size in `ml` and its price (e.g. `100` and `180`).
+2. Repeat for every size you sell (`200`, `300`, …). Use the 🗑 button to remove a row.
+3. Save. The product list then shows a summary such as
+   `Oud · $180 · 100ml $180 / 200ml $320 / 300ml $450`.
+
+Notes:
+
+- With sizes set, the **card price is the smallest size's price** (the "from" price) —
+  the base `Price` field is only used by products that have no sizes.
+- Sizes are stored smallest-first, and the smallest one is preselected for the customer.
+- Size `ml` values must be positive numbers; incomplete rows (missing ml or price) are
+  ignored on save.
+
+**How customers use it (storefront)**
+
+- Each product card shows a **size button** (`100ml ⌄`). Tapping the arrow opens the other
+  sizes with their prices; picking one updates the price shown on the card.
+- The **Add to Cart** and **Chat on WhatsApp** buttons use the size that is currently
+  selected, and the size is written into the WhatsApp order message
+  (`1. Oud Royale — 200ml`).
+- Different sizes of the same oil are **separate cart lines** (100ml ×1 and 200ml ×2 stay
+  apart instead of merging).
+- The product details page shows the same size picker above the description, next to the
+  **Add to Cart** and **Chat on WhatsApp** buttons; opening a card with a chosen size
+  arrives with that size preselected (`/product.html?id=…&ml=200`).
 
 ## How it's organized
 

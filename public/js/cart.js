@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     items.forEach((it, i) => {
       lines.push('');
-      lines.push(`${i + 1}. ${it.name}`);
+      lines.push(`${i + 1}. ${it.name}${it.ml ? ` — ${Alwazir.mlLabel(it.ml)}` : ''}`);
       lines.push(`💰 Price: ${Alwazir.formatMoney(it.price)}  × ${it.qty}`);
     });
 
@@ -74,10 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
     itemsEl.innerHTML = items
       .map(
         (it) => `
-      <div class="cart-item" data-id="${it.id}">
+      <div class="cart-item" data-key="${Alwazir.escapeHtml(it.key)}">
         ${it.image ? `<img class="cart-item-img" src="${it.image}" alt="">` : `<div class="cart-item-img media-placeholder" style="font-size:1.6rem">${(it.name || '?').charAt(0).toUpperCase()}</div>`}
         <div class="cart-item-info">
-          <div class="cart-item-name">${Alwazir.escapeHtml(it.name)}</div>
+          <div class="cart-item-name">${Alwazir.escapeHtml(it.name)}${it.ml ? `<span class="cart-item-size">${Alwazir.mlLabel(it.ml)}</span>` : ''}</div>
           <div class="cart-item-price">${Alwazir.formatMoney(it.price)}</div>
           <div class="qty-control">
             <button class="qty-btn" data-qty="-1">&#8722;</button>
@@ -103,17 +103,17 @@ document.addEventListener('DOMContentLoaded', () => {
   itemsEl.addEventListener('click', (e) => {
     const itemEl = e.target.closest('.cart-item');
     if (!itemEl) return;
-    const id = itemEl.dataset.id;
+    const key = itemEl.dataset.key;
 
     if (e.target.closest('[data-qty]')) {
       const delta = Number(e.target.closest('[data-qty]').dataset.qty);
-      const current = Alwazir.getCart().find((it) => it.id === id);
+      const current = Alwazir.getCart().find((it) => it.key === key);
       if (current) {
-        Alwazir.updateQty(id, current.qty + delta);
+        Alwazir.updateQty(key, current.qty + delta);
         render();
       }
     } else if (e.target.closest('[data-remove]')) {
-      Alwazir.removeFromCart(id);
+      Alwazir.removeFromCart(key);
       render();
     }
   });

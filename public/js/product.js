@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const notFound = document.querySelector('[data-product-notfound]');
 
   document.querySelector('[data-year]').textContent = new Date().getFullYear();
-  document.querySelector('[data-back-home]').addEventListener('click', () => (window.location.href = '/'));
 
   async function load() {
     let product = null;
@@ -40,6 +39,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('[data-details-price]').textContent = Alwazir.formatMoney(product.price);
     document.querySelector('[data-details-desc]').textContent = product.description || '';
     document.querySelector('[data-details-add]').dataset.id = product.id;
+    const chatBtn = document.querySelector('[data-details-chat]');
+    if (chatBtn) chatBtn.dataset.id = product.id;
+
+    // Size (ml) picker — prefilled from ?ml=… when arriving from a card.
+    const sizesEl = document.querySelector('[data-details-sizes]');
+    sizesEl.innerHTML = Alwazir.sizeSelectHtml(product);
+    const wantedMl = Number(params.get('ml'));
+    if (Number.isFinite(wantedMl) && wantedMl > 0) {
+      const opt = sizesEl.querySelector(`[data-size-opt][data-ml="${wantedMl}"]`);
+      if (opt) opt.click();
+    }
 
     const badges = document.querySelector('[data-details-badges]');
     badges.innerHTML =
