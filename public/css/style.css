@@ -699,7 +699,8 @@ input, textarea, select {
 .product-actions { display: flex; gap: 10px; }
 
 /* ---------- size (ml) picker ---------- */
-.size-row { display: flex; align-items: center; margin-top: 2px; }
+/* price and the small ml button sit next to each other */
+.product-price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .special-sizes, .details-sizes { display: flex; align-items: center; }
 .special-sizes:empty, .details-sizes:empty { display: none; }
 
@@ -727,6 +728,17 @@ input, textarea, select {
   color: var(--accent-strong);
   background: var(--accent-ghost);
 }
+
+/* the small "100ml ⌄" chip that sits in front of the price */
+.product-price-row .size-btn {
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  gap: 5px;
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  background: var(--accent-ghost);
+}
+.mini-body .size-btn { padding: 4px 8px; font-size: 0.7rem; }
 
 .size-caret { transition: transform 0.18s ease; flex-shrink: 0; }
 .size-select.open .size-caret { transform: rotate(180deg); }
@@ -781,6 +793,11 @@ input, textarea, select {
 .empty-state .big { font-size: 2.6rem; margin-bottom: 8px; }
 
 /* ---------- product details page ---------- */
+/* `overflow-x: clip` keeps a too-wide child from making the whole page wider
+   than the screen (which makes mobile browsers zoom the page out), without
+   creating a scroll container — so the sticky details image keeps working. */
+body { overflow-x: clip; }
+
 .details-page { padding: 56px 0 90px; }
 
 .breadcrumb {
@@ -793,9 +810,12 @@ input, textarea, select {
 
 .details-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  /* minmax(0, …) lets both columns shrink instead of overflowing the page */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 56px;
   align-items: start;
+  max-width: 1120px;
+  margin: 0 auto;
 }
 
 .details-media {
@@ -805,13 +825,33 @@ input, textarea, select {
   overflow: hidden;
   position: sticky;
   top: 100px;
+  min-width: 0;
+  /* keep the photo at a sane size so the page doesn't look zoomed out */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 72vh;
 }
 
-.details-media img { width: 100%; height: auto; object-fit: cover; }
+.details-media img {
+  width: 100%;
+  height: auto;
+  max-height: 72vh;
+  object-fit: contain;
+}
 
-.details-media .media-placeholder { min-height: 460px; }
+.details-media .media-placeholder { min-height: 420px; }
 
-.details-info { display: flex; flex-direction: column; gap: 18px; padding-top: 6px; }
+.details-info {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 6px;
+  min-width: 0;
+}
+
+.details-info h1,
+.details-desc { overflow-wrap: anywhere; }
 
 .details-badges { display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -1417,6 +1457,55 @@ input, textarea, select {
 
 .mode-sub { font-weight: 500; font-size: 0.78rem; color: var(--muted); }
 
+/* theme customizer (pick any two colours) */
+.custom-colors { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.custom-color {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.custom-color input[type='color'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.custom-color input[type='color']::-webkit-color-swatch-wrapper { padding: 3px; }
+.custom-color input[type='color']::-webkit-color-swatch { border: none; border-radius: 9px; }
+.custom-color input[type='color']::-moz-color-swatch { border: none; border-radius: 9px; }
+
+.custom-color-text { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+
+.custom-color-name { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+
+.custom-color-text input[type='text'] {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  border-radius: 9px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  outline: none;
+}
+
+.custom-color-text input[type='text']:focus { border-color: var(--accent); }
+
 /* theme picker */
 .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 
@@ -1497,8 +1586,10 @@ input, textarea, select {
   html[data-mobile-columns='single'] .grid { grid-template-columns: 1fr; gap: 26px; }
   html[data-mobile-columns='single'] .product-media { min-height: 320px; }
 
-  .details-layout { grid-template-columns: 1fr; gap: 32px; }
-  .details-media { position: static; }
+  .details-layout { grid-template-columns: minmax(0, 1fr); gap: 32px; max-width: none; }
+  .details-media { position: static; max-height: none; }
+  .details-media img { max-height: 70vh; }
+  .details-actions .btn { min-width: 0; }
 
   .special-card { grid-template-columns: 1fr; }
   .special-info { padding: 28px; }
@@ -1583,13 +1674,18 @@ input, textarea, select {
   /* ---------- product details page ---------- */
   .details-page { padding: 32px 0 60px; }
   .breadcrumb { margin-bottom: 18px; }
+  .details-media img { max-height: 62vh; }
+  .details-media .media-placeholder { min-height: 220px; }
   .details-info { gap: 14px; }
   .details-info h1 { font-size: 1.8rem; }
   .details-price { font-size: 1.6rem; }
   .details-desc { font-size: 0.95rem; line-height: 1.7; }
   .details-actions { gap: 10px; }
-  .details-actions .btn { flex: 1; padding: 13px 14px; font-size: 0.9rem; }
+  .details-actions .btn { flex: 1 1 auto; min-width: 0; padding: 13px 14px; font-size: 0.9rem; }
   .details-sizes .size-btn { padding: 11px 16px; font-size: 0.88rem; }
+  .product-price-row { gap: 8px; }
+  .product-price-row .size-btn { padding: 5px 9px; font-size: 0.7rem; }
+  .custom-colors { grid-template-columns: 1fr; }
 
   /* size editor rows stack so they stay tappable */
   .variant-row { flex-wrap: wrap; }

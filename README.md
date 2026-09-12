@@ -122,9 +122,11 @@ So the exact same code runs locally and on Vercel with zero changes.
 - **Search** — instant search by product name and category, ranked by relevance.
 - **Mobile product view** — admin toggle for **Single Mode** (1 per row) or
   **Double Mode** (2 per row) on phones.
-- **Themes** — 10 selectable color themes (Gold & White, Rose Gold, Emerald,
+- **Themes** — 10 ready-made color themes (Gold & White, Rose Gold, Emerald,
   Midnight Gold, Ivory, Royal Blue, Dark Black & Green, Dark Black & White,
-  Black & Emerald, Silver & Emerald).
+  Black & Emerald, Silver & Emerald) **plus a customizer** where you pick any
+  two colours (background + accent) with a colour selector or a colour code.
+  See [Custom theme (any two colours)](#custom-theme-any-two-colours).
 - **Text style** — 7 selectable fonts for the body text, a separate 7-font picker
   for the **brand name**, and a **bold** toggle.
 - **Brand customization** — editable name, tagline, logo, WhatsApp number and
@@ -143,6 +145,32 @@ So the exact same code runs locally and on Vercel with zero changes.
   the **most-unused** image (not used by any product/logo/preview, oldest first)
   is deleted automatically.
 - **Cart** — add to cart, adjust quantities, and order via WhatsApp chat.
+
+## Custom theme (any two colours)
+
+Admin panel → **Brand & Theme** → **Theme customizer — pick any two colours**:
+
+- **Background colour** — the base colour of the whole store (white, ivory, navy,
+  black …).
+- **Accent colour** — used for buttons, prices, borders and highlights.
+
+Pick a colour by clicking the swatch (opens the browser colour selector) **or** by
+typing a code such as `#c9a227` (3-digit codes like `#abc` work too and are expanded
+to `#aabbcc`). As soon as you pick or type a colour, the **Custom** theme card is
+selected and the admin page previews it live. Press **Save Changes** to apply it to
+the storefront.
+
+Everything else is derived automatically from those two colours, so the whole site
+stays consistent: darker/lighter accent shades, a matching gradient for the gold
+buttons, borders, soft backgrounds, shadows, and readable text (light accents get
+dark text, dark accents get white text).
+
+- Colours are validated on the server — anything that is not a colour code is
+  rejected with an error (`Theme colour "bg" must be a colour code like #c9a227`).
+- The colours are injected into the page **before first paint**, so a custom theme
+  never flashes the default theme while loading.
+- Selecting any of the ready-made themes again clears the custom colours; they are
+  remembered and come back when you switch back to **Custom**.
 
 ## Sizes (ml) & prices
 
@@ -165,8 +193,9 @@ Notes:
 
 **How customers use it (storefront)**
 
-- Each product card shows a **size button** (`100ml ⌄`). Tapping the arrow opens the other
-  sizes with their prices; picking one updates the price shown on the card.
+- Each product card shows a small **size button** (`100ml ⌄`) right next to the price.
+  Tapping the arrow opens the other sizes with their prices; picking one updates the
+  price next to it.
 - The **Add to Cart** and **Chat on WhatsApp** buttons use the size that is currently
   selected, and the size is written into the WhatsApp order message
   (`1. Oud Royale — 200ml`).

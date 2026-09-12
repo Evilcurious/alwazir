@@ -144,7 +144,28 @@
                   <div class="theme-card theme-bw" data-theme="bw"><div class="theme-swatches"><span class="swatch sw1"></span><span class="swatch sw2"></span></div>Dark Black &amp; White</div>
                   <div class="theme-card theme-blackemerald" data-theme="blackemerald"><div class="theme-swatches"><span class="swatch sw1"></span><span class="swatch sw2"></span></div>Black &amp; Emerald</div>
                   <div class="theme-card theme-silveremerald" data-theme="silveremerald"><div class="theme-swatches"><span class="swatch sw1"></span><span class="swatch sw2"></span></div>Silver &amp; Emerald</div>
+                  <div class="theme-card theme-custom" data-theme="custom"><div class="theme-swatches"><span class="swatch sw1" data-custom-swatch="bg"></span><span class="swatch sw2" data-custom-swatch="accent"></span></div>Custom (your 2 colours)</div>
                 </div>
+              </div>
+              <div class="field full">
+                <label>Theme customizer &mdash; pick any two colours</label>
+                <div class="custom-colors" data-custom-colors>
+                  <div class="custom-color">
+                    <input type="color" data-custom-picker="bg" aria-label="Choose the background colour">
+                    <div class="custom-color-text">
+                      <span class="custom-color-name">Background colour</span>
+                      <input type="text" data-custom-hex="bg" placeholder="#ffffff" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Background colour code">
+                    </div>
+                  </div>
+                  <div class="custom-color">
+                    <input type="color" data-custom-picker="accent" aria-label="Choose the accent colour">
+                    <div class="custom-color-text">
+                      <span class="custom-color-name">Accent colour (buttons, prices, highlights)</span>
+                      <input type="text" data-custom-hex="accent" placeholder="#c9a227" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Accent colour code">
+                    </div>
+                  </div>
+                </div>
+                <span class="hint">Click a swatch to open the colour selector, or type a colour code like <code>#c9a227</code>. Picking a colour selects the <strong>Custom</strong> theme above and previews it live — press <strong>Save Changes</strong> to apply it to the store.</span>
               </div>
               <div class="field full">
                 <label>Text style (font)</label>
@@ -289,6 +310,7 @@
     </div>
   </div>
 
+  <script src="/js/theme-colors.js"></script>
   <script src="/js/app.js"></script>
   <script src="/js/admin.js"></script>
 </body>

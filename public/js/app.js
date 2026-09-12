@@ -149,9 +149,24 @@ const Alwazir = (() => {
     applySettings();
   }
 
+  /* Custom (two-colour) theme: derives + applies the palette, or clears it so
+     the built-in themes take over again. */
+  function applyThemeVars(theme, customColors) {
+    const root = document.documentElement;
+    const TC = typeof window !== 'undefined' ? window.AlwazirThemeColors : null;
+    if (!TC) return;
+    const vars = theme === 'custom' ? TC.deriveVars(customColors && customColors.bg, customColors && customColors.accent) : null;
+    TC.VAR_NAMES.forEach((name) => root.style.removeProperty(name));
+    if (vars) {
+      Object.keys(vars).forEach((name) => root.style.setProperty(name, vars[name]));
+    }
+  }
+
   function applySettings() {
     const root = document.documentElement;
-    root.setAttribute('data-theme', settings.theme || 'gold');
+    const theme = settings.theme || 'gold';
+    root.setAttribute('data-theme', theme);
+    applyThemeVars(theme, settings.customColors);
     root.setAttribute('data-mobile-columns', settings.mobileColumns === 'single' ? 'single' : 'double');
 
     const font = settings.fontFamily && settings.fontFamily !== 'default' ? settings.fontFamily : null;
@@ -321,8 +336,16 @@ const Alwazir = (() => {
     return `<div class="media-placeholder">${initial}</div>`;
   }
 
-  function productCardHtml(p) {
+  /* The small size (ml) button and the price, side by side (button first). */
+  function priceRowHtml(p, priceClass) {
     const sizes = sizeSelectHtml(p);
+    return `
+            <div class="product-price-row">
+              ${sizes}${sizes ? '\n              ' : ''}<div class="${priceClass || 'product-price'}" data-price-display>${formatMoney(p.price)}</div>
+            </div>`;
+  }
+
+  function productCardHtml(p) {
     return `
       <article class="product-card" data-id="${p.id}">
         <a class="product-media" href="/product.html?id=${encodeURIComponent(p.id)}" aria-label="View ${escapeHtml(p.name)} details">
@@ -333,9 +356,8 @@ const Alwazir = (() => {
           <div class="product-category">${escapeHtml(p.category || 'General')}</div>
           <h3 class="product-name">${escapeHtml(p.name)}</h3>
           <p class="product-desc">${escapeHtml(p.description || '')}</p>
-          ${sizes ? `<div class="size-row">${sizes}</div>` : ''}
           <div class="product-foot">
-            <div class="product-price" data-price-display>${formatMoney(p.price)}</div>
+            ${priceRowHtml(p, 'product-price')}
             <div class="product-actions">
               <button class="btn btn-whatsapp" data-action="chat" data-id="${p.id}">${WHATSAPP_ICON} Chat</button>
               <button class="btn btn-gold" data-action="add" data-id="${p.id}">Add to Cart</button>
@@ -346,7 +368,6 @@ const Alwazir = (() => {
   }
 
   function miniCardHtml(p) {
-    const sizes = sizeSelectHtml(p);
     return `
       <article class="mini-card" data-id="${p.id}">
         <a class="mini-media" href="/product.html?id=${encodeURIComponent(p.id)}" aria-label="${escapeHtml(p.name)}">
@@ -357,8 +378,7 @@ const Alwazir = (() => {
           <div class="product-category">${escapeHtml(p.category || 'General')}</div>
           <h4 class="product-name">${escapeHtml(p.name)}</h4>
           <p class="product-desc">${escapeHtml(p.description || '')}</p>
-          ${sizes ? `<div class="size-row">${sizes}</div>` : ''}
-          <div class="product-price" data-price-display>${formatMoney(p.price)}</div>
+          ${priceRowHtml(p)}
           <button class="btn btn-gold" data-action="add" data-id="${p.id}">Add to Cart</button>
         </div>
       </article>`;
@@ -491,6 +511,8 @@ const Alwazir = (() => {
     defaultVariant,
     sizeSelectHtml,
     selectedVariant,
+    priceRowHtml,
+    applyThemeVars,
     escapeHtml,
     toast,
     applySettings

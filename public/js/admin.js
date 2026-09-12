@@ -174,11 +174,116 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (row) row.remove();
   });
 
+  /* ---------- theme customizer (any two colours) ---------- */
+  const TC = () => window.AlwazirThemeColors;
+
+  function defaultCustomColors() {
+    return (TC() && TC().DEFAULT_CUSTOM) || { bg: '#ffffff', accent: '#c9a227' };
+  }
+
+  /* { bg, accent } — saved values, falling back to the defaults. */
+  function currentCustomColors() {
+    const saved = (settings && settings.customColors) || {};
+    const def = defaultCustomColors();
+    return {
+      bg: (TC() && TC().normalizeHex(saved.bg)) || def.bg,
+      accent: (TC() && TC().normalizeHex(saved.accent)) || def.accent
+    };
+  }
+
+  function selectThemeCard(theme) {
+    document.querySelectorAll('[data-theme-grid] .theme-card').forEach((c) => {
+      c.classList.toggle('selected', c.dataset.theme === theme);
+    });
+  }
+
+  function selectedTheme() {
+    const card = document.querySelector('[data-theme-grid] .theme-card.selected');
+    return (card && card.dataset.theme) || 'gold';
+  }
+
+  /* Paints the admin page immediately with the picked colours (live preview). */
+  function previewCustomColors(colors) {
+    document.documentElement.setAttribute('data-theme', 'custom');
+    Alwazir.applyThemeVars('custom', colors);
+  }
+
+  function renderCustomColors() {
+    const colors = currentCustomColors();
+    const pickerBg = document.querySelector('[data-custom-picker="bg"]');
+    const pickerAccent = document.querySelector('[data-custom-picker="accent"]');
+    const hexBg = document.querySelector('[data-custom-hex="bg"]');
+    const hexAccent = document.querySelector('[data-custom-hex="accent"]');
+    if (pickerBg) pickerBg.value = colors.bg;
+    if (pickerAccent) pickerAccent.value = colors.accent;
+    if (hexBg) hexBg.value = colors.bg;
+    if (hexAccent) hexAccent.value = colors.accent;
+    // swatches on the "Custom" theme card
+    const swBg = document.querySelector('[data-custom-swatch="bg"]');
+    const swAccent = document.querySelector('[data-custom-swatch="accent"]');
+    if (swBg) swBg.style.background = colors.bg;
+    if (swAccent) swAccent.style.background = colors.accent;
+  }
+
+  /* Reads the current state of the customizer controls into { bg, accent }. */
+  function readCustomColors() {
+    const pickerBg = document.querySelector('[data-custom-picker="bg"]');
+    const pickerAccent = document.querySelector('[data-custom-picker="accent"]');
+    const colors = currentCustomColors();
+    return {
+      bg: (TC() && TC().normalizeHex(pickerBg && pickerBg.value)) || colors.bg,
+      accent: (TC() && TC().normalizeHex(pickerAccent && pickerAccent.value)) || colors.accent
+    };
+  }
+
+  /* A colour was picked (selector) or typed (colour code) -> preview it live. */
+  function applyCustomColorFromControls() {
+    const colors = readCustomColors();
+    const hexBg = document.querySelector('[data-custom-hex="bg"]');
+    const hexAccent = document.querySelector('[data-custom-hex="accent"]');
+    if (hexBg) hexBg.value = colors.bg;
+    if (hexAccent) hexAccent.value = colors.accent;
+    const swBg = document.querySelector('[data-custom-swatch="bg"]');
+    const swAccent = document.querySelector('[data-custom-swatch="accent"]');
+    if (swBg) swBg.style.background = colors.bg;
+    if (swAccent) swAccent.style.background = colors.accent;
+    selectThemeCard('custom'); // picking a colour chooses the Custom theme
+    previewCustomColors(colors);
+  }
+
+  document.querySelector('[data-custom-colors]').addEventListener('input', (e) => {
+    const picker = e.target.closest('[data-custom-picker]');
+    const hex = e.target.closest('[data-custom-hex]');
+    if (picker) {
+      const other = picker.dataset.customPicker === 'bg' ? 'accent' : 'bg';
+      const otherPicker = document.querySelector(`[data-custom-picker="${other}"]`);
+      if (otherPicker) otherPicker.value = readCustomColors()[other]; // keep the pair in sync
+      applyCustomColorFromControls();
+      return;
+    }
+    if (hex) {
+      const value = hex.value.trim();
+      if (!TC() || !TC().isHex(value)) return; // wait until it is a full colour code
+      const pickerEl = document.querySelector(`[data-custom-picker="${hex.dataset.customHex}"]`);
+      if (pickerEl) pickerEl.value = TC().normalizeHex(value);
+      applyCustomColorFromControls();
+    }
+  });
+
+  document.querySelector('[data-custom-colors]').addEventListener('change', (e) => {
+    const hex = e.target.closest('[data-custom-hex]');
+    if (hex && !(TC() && TC().isHex(hex.value))) {
+      Alwazir.toast('Enter a colour code like #c9a227');
+      hex.value = readCustomColors()[hex.dataset.customHex];
+    }
+  });
+
   /* ---------- render ---------- */
   function renderAll() {
     renderProducts();
     renderBrandForm();
     renderThemePicker();
+    renderCustomColors();
     renderMobileToggle();
     renderFontPicker();
     renderBrandFontPicker();
@@ -484,7 +589,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       whatsapp: field(form, 'whatsapp').value,
       shareTitle: field(form, 'shareTitle').value,
       shareDescription: field(form, 'shareDescription').value,
-      theme: document.querySelector('.theme-card.selected')?.dataset.theme || 'gold',
+      theme: selectedTheme(),
+      customColors: readCustomColors(),
       mobileColumns: document.querySelector('[data-mobile-toggle] .mode-card.selected')?.dataset.mode || 'double',
       fontFamily: document.querySelector('[data-font-grid] .font-card.selected')?.dataset.font || 'default',
       brandFont: document.querySelector('[data-brand-font-grid] .font-card.selected')?.dataset.brandFont || 'default',
@@ -522,7 +628,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     card.classList.add('selected');
     // live preview the theme on the admin page
     document.documentElement.setAttribute('data-theme', card.dataset.theme);
+    applyPreviewForTheme(card.dataset.theme);
   });
+
+  /* Custom theme keeps its derived colours; any other theme clears them. */
+  function applyPreviewForTheme(theme) {
+    if (theme === 'custom') previewCustomColors(readCustomColors());
+    else Alwazir.applyThemeVars(theme, null);
+  }
 
   document.querySelector('[data-mobile-toggle]').addEventListener('click', (e) => {
     const card = e.target.closest('.mode-card');
