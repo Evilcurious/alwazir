@@ -1602,6 +1602,14 @@ body { overflow-x: clip; }
 .font-card.selected { color: var(--accent-strong); }
 .font-card.selected .font-sample { color: var(--accent-strong); }
 
+/* ---------- laptop/desktop: hero brand on one line ---------- */
+@media (min-width: 641px) {
+  /* the big hero brand stays on ONE line — JS (fitHeroBrand) shrinks the font
+     until the full name fits; ultra-long names fall back to wrapping in full */
+  .hero-brand { white-space: nowrap; overflow: hidden; }
+  .hero-brand.allow-wrap { white-space: normal; overflow: visible; }
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {
   .grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }

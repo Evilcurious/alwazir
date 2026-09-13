@@ -201,8 +201,9 @@ const Alwazir = (() => {
       const page = title.dataset.page ? `${title.dataset.page} — ` : '';
       title.textContent = `${page}${settings.brandName || 'Alwazir'}`;
     }
-    // the brand text just changed — re-fit it so the full name stays visible
+    // the brand text just changed — re-fit header + hero so the full name stays visible
     fitHeaderBrands();
+    fitHeroBrand();
   }
 
   /* ---------- header brand auto-fit ---------- */
@@ -224,9 +225,34 @@ const Alwazir = (() => {
   }
 
   let fitTimer = null;
-  function scheduleFitHeaderBrands() {
+  function scheduleFitBrands() {
     clearTimeout(fitTimer);
-    fitTimer = setTimeout(fitHeaderBrands, 120);
+    fitTimer = setTimeout(() => {
+      fitHeaderBrands();
+      fitHeroBrand();
+    }, 120);
+  }
+
+  /* ---------- hero brand one-line fit (laptop/desktop) ---------- */
+  /* On laptop screens the big hero brand stays on ONE line: shrink the font
+     until the full name fits. (On phones it keeps wrapping — see CSS.) */
+  function fitHeroBrand() {
+    const el = document.querySelector('.hero-brand');
+    if (!el) return;
+    el.style.fontSize = ''; // reset so it can grow back on wider screens
+    el.classList.remove('allow-wrap');
+    // phones keep the wrapping layout — nothing to fit there
+    if (window.matchMedia && !window.matchMedia('(min-width: 641px)').matches) return;
+    const base = parseFloat(window.getComputedStyle(el).fontSize) || 48;
+    let size = base;
+    const min = 26; // px floor — below this, wrap in full instead of shrinking further
+    let guard = 120; // safety cap on loop iterations
+    while (guard-- > 0 && size > min && el.scrollWidth > el.clientWidth + 1) {
+      size -= 1;
+      el.style.fontSize = size + 'px';
+    }
+    // still doesn't fit even when tiny? show the whole name wrapped, never clipped
+    if (el.scrollWidth > el.clientWidth + 1) el.classList.add('allow-wrap');
   }
 
   /* ---------- toast ---------- */
@@ -506,9 +532,9 @@ const Alwazir = (() => {
     wireActions();
     // re-fit the brand name when the viewport changes or webfonts arrive
     // (font loading changes text width)
-    window.addEventListener('resize', scheduleFitHeaderBrands);
+    window.addEventListener('resize', scheduleFitBrands);
     if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => fitHeaderBrands()).catch(() => {});
+      document.fonts.ready.then(() => { fitHeaderBrands(); fitHeroBrand(); }).catch(() => {});
     }
   }
 
@@ -548,6 +574,7 @@ const Alwazir = (() => {
     escapeHtml,
     toast,
     fitHeaderBrands,
+    fitHeroBrand,
     applySettings
   };
 })();
