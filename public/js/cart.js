@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---------- helpers ---------- */
   function buildOrderMessage() {
     const items = Alwazir.getCart();
-    const brand = Alwazir.settings().brandName || 'alwazir';
+    const brand = Alwazir.settings().brandName || 'Alwazir';
     const lines = [];
     lines.push(`🛍️ *New Order — ${brand}*`);
 

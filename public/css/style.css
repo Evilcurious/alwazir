@@ -274,6 +274,11 @@ input, textarea, select {
   display: flex;
   align-items: center;
   gap: 12px;
+  /* take the free space but shrink on narrow screens, so the full brand name
+     always fits next to the cart button (laptop + mobile) */
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .brand-logo {
@@ -284,21 +289,34 @@ input, textarea, select {
   background: #fff;
   border: 1px solid var(--border);
   padding: 3px;
+  flex-shrink: 0;
 }
 
+/* Header / admin brand name: one fluid line that always shows the FULL name —
+   it shrinks with the viewport (plus a JS auto-fit) instead of wrapping or
+   pushing the cart button off the screen. */
 .brand-name {
   font-family: var(--font-brand);
-  font-size: 1.5rem;
+  font-size: clamp(1.05rem, 0.9rem + 0.9vw, 1.5rem);
   font-weight: 700;
   letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
+  /* gradient text can clip descenders (g, y, p…) — give them breathing room */
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
 }
-
-.brand-name .gold-text { font-size: inherit; }
 
 .header-actions {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-shrink: 0;
 }
 
 .admin-link {
@@ -358,8 +376,16 @@ input, textarea, select {
   font-size: clamp(3rem, 8vw, 5.5rem);
   font-weight: 700;
   letter-spacing: 0.04em;
-  line-height: 1;
+  /* roomy enough that gradient descenders never clip, tight enough to look grand */
+  line-height: 1.08;
   text-transform: capitalize;
+  /* long brand names wrap in full instead of overflowing the screen */
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  text-wrap: balance;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
 }
 
 .hero-tagline {
@@ -1116,6 +1142,11 @@ body { overflow-x: clip; }
   font-size: 1.15rem;
   margin-bottom: 6px;
   color: var(--text);
+  /* the footer has room — show the whole name on as many lines as it needs */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: break-word;
 }
 
 /* ---------- admin ---------- */
@@ -1614,7 +1645,9 @@ body { overflow-x: clip; }
   .header-inner { height: 60px; gap: 10px; }
   .brand { gap: 8px; min-width: 0; }
   .brand-logo { width: 34px; height: 34px; }
-  .brand-name { font-size: 1.2rem; white-space: nowrap; }
+  /* fluid header size on phones (nowrap/ellipsis come from the base rule) */
+  .site-header .brand-name,
+  .admin-header .brand-name { font-size: clamp(1rem, 4.6vw, 1.2rem); }
   .header-actions { gap: 8px; flex-shrink: 0; }
   .admin-link { padding: 7px 12px; font-size: 0.78rem; }
   .cart-btn { padding: 8px 12px; font-size: 0.82rem; gap: 6px; }
@@ -1717,7 +1750,6 @@ body { overflow-x: clip; }
     gap: 10px;
     flex-wrap: wrap;
   }
-  .admin-header .brand-name { font-size: 1.15rem; }
   .admin-nav { gap: 8px; }
   .admin-nav .btn { padding: 8px 12px; font-size: 0.8rem; }
   .admin-layout { padding: 16px; gap: 16px; }
@@ -1751,5 +1783,6 @@ body { overflow-x: clip; }
   .cart-btn { padding: 8px 10px; }
   .similar-grid { grid-template-columns: 1fr; }
   .search-btn { padding: 11px 14px; }
-  .brand-name { font-size: 1.1rem; }
+  .site-header .brand-name,
+  .admin-header .brand-name { font-size: clamp(0.95rem, 5vw, 1.1rem); }
 }
